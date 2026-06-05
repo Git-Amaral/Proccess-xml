@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CamelDev · XML Extractor & Processor v5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════
+   RESET, CSS VARIABLES & THEMES (CAMELDEV PATTERN)
+   ═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --green:#11cb07;
+  --green-dim:rgba(17,203,7,0.10);
+  --green-glow:rgba(17,203,7,0.28);
+  --green-border:rgba(17,203,7,0.22);
+  --bg:#06090f;
+  --surface:#0d1117;
+  --card:#0f1923;
+  --card2:#111827;
+  --border:rgba(255,255,255,0.07);
+  --text:#f0f6fc;
+  --muted:#8b949e;
+  --muted2:#5e6673;
+  --red:#ff4444;
+  --yellow:#f0c020;
+  --nav-h:68px;
+}
+[data-theme="light"]{
+  --bg:#eef2f7;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --card2:#f4f6fb;
+  --border:rgba(0,0,0,0.08);
+  --green-dim:rgba(17,203,7,0.08);
+  --green-border:rgba(17,203,7,0.3);
+  --text:#0d1117;
+  --muted:#4a5568;
+  --muted2:#718096;
+}
+
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  overflow-x:hidden;transition:background .3s,color .3s;
+  min-height:100vh;
+}
+
+#circuit-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:0;pointer-events:none;opacity:.15;
+}
+
+/* ═══════════════════════════════════════════
+   NAVBAR & LOGO
+   ═══════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:var(--nav-h);
+  background:rgba(6,9,15,0.82);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 5%;
+}
+[data-theme="light"] nav{background:rgba(240,244,247,0.88)}
+
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;
+  color:var(--text);text-decoration:none;
+}
+.nav-logo-icon{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(135deg,var(--green),#0da604);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:900;color:#fff;
+  box-shadow:0 0 14px var(--green-glow);
+}
+
+.nav-center{
+  display:flex;align-items:center;gap:4px;
+  flex:1;justify-content:center;
+}
+.nav-tab{
+  padding:8px 16px;border-radius:8px;
+  color:var(--muted);font-size:.85rem;font-weight:500;
+  cursor:pointer;transition:all .2s;border:none;background:transparent;
+  display:flex;align-items:center;gap:6px;
+}
+.nav-tab:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.nav-tab.active{
+  color:var(--green);background:var(--green-dim);
+  border:1px solid var(--green-border);
+}
+
+.nav-end{display:flex;align-items:center;gap:8px;}
+.theme-btn{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;
+  cursor:pointer;font-size:16px;color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT & LAYOUT BOUNDS
+   ═══════════════════════════════════════════ */
+main{position:relative;z-index:1;padding-top:var(--nav-h);min-height:100vh;}
+.page{display:none;padding:40px 5% 60px;animation:fadeIn .35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.page-header{margin-bottom:36px}
+.page-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;
+  border:1px solid var(--green-border);background:var(--green-dim);
+  font-size:.75rem;font-weight:600;color:var(--green);
+  margin-bottom:12px;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+}
+.page-title{
+  font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.6rem);
+  font-weight:800;letter-spacing:-1px;margin-bottom:10px;
+}
+.page-sub{font-size:.95rem;color:var(--muted);max-width:620px;line-height:1.7}
+
+/* ═══════════════════════════════════════════
+   DASHBOARD METRIC CARDS
+   ═══════════════════════════════════════════ */
+.dash-metrics {
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+  gap:16px;
+  margin-bottom:28px;
+}
+.metric-card {
+  background:var(--card2);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:20px;
+  transition:all .3s;
+}
+.metric-card:hover { border-color:var(--green-border); }
+.metric-label {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.75rem;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.metric-value {
+  font-family:'Inter', system-ui, sans-serif;
+  font-size:1.75rem;
+  font-weight:800;
+  letter-spacing: -0.03em;
+  color:var(--text);
+}
+.metric-value.highlight { color:var(--green); }
+
+/* ═══════════════════════════════════════════
+   DRAG & DROP ZONE
+   ═══════════════════════════════════════════ */
+.drop-zone {
+  background:var(--card);
+  border:2px dashed var(--border);
+  border-radius:14px;
+  padding:50px 30px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .25s ease;
+  margin-bottom:28px;
+  position:relative;
+}
+.drop-zone:hover, .drop-zone.dragover {
+  border-color:var(--green);
+  background:var(--green-dim);
+}
+.drop-zone-icon {
+  font-size:2.5rem;
+  margin-bottom:14px;
+  display:block;
+  pointer-events: none;
+}
+.drop-zone-text {
+  font-size:1rem;
+  font-weight:600;
+  margin-bottom:6px;
+  pointer-events: none;
+}
+.drop-zone-sub {
+  font-size:0.82rem;
+  color:var(--muted);
+  pointer-events: none;
+}
+.file-input-hidden {
+  position:absolute;
+  top:0; left:0; width:100%; height:100%;
+  opacity:0; cursor:pointer;
+  z-index: 10;
+}
+
+/* ═══════════════════════════════════════════
+   TABLES & GENERAL INTERFACE COMPONENTS
+   ═══════════════════════════════════════════ */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:28px;margin-bottom:24px;
+}
+.card-title{
+  font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.card-title .icon{font-size:1.1rem}
+
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{
+  background:rgba(17,203,7,0.07);
+  color:var(--green);font-weight:600;
+  padding:12px 14px;text-align:left;
+  border-bottom:1px solid var(--green-border);
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  text-transform:uppercase;white-space:nowrap;
+}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--text);}
+tbody tr:hover td{background:rgba(17,203,7,0.03)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.82rem;}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 22px;border-radius:9px;
+  font-size:.88rem;font-weight:600;cursor:pointer;
+  border:none;font-family:'Inter',sans-serif;transition:all .22s;
+}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 0 20px var(--green-glow);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 32px var(--green-glow)}
+.btn-secondary{background:var(--card2); color:var(--text); border:1px solid var(--border); margin-right:8px;}
+.btn-secondary:hover{border-color:var(--green-border);}
+
+.about-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:18px;margin-bottom:32px;
+}
+.about-step{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:24px;position:relative;
+}
+.about-step-num{
+  font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;
+  color:var(--green-border);margin-bottom:10px;line-height:1;
+}
+.about-step-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:8px}
+.about-step-desc{font-size:.84rem;color:var(--muted);line-height:1.6}
+
+.log-box {
+  background:#020603;border:1px solid var(--green-border);
+  border-radius:10px;padding:16px;max-height:200px;overflow-y:auto;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;color:var(--muted);
+  margin-top:16px;
+}
+.log-ok { color:var(--green); }
+.log-info { color:#5bc8fa; }
+.log-warn { color:var(--yellow); }
+.log-err { color:var(--red); }
+
+.divider{height:1px;margin:28px 0;background:linear-gradient(to right,var(--green-border),transparent);}
+.flex-between { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
+.btn-group { display:flex; gap:8px; }
+</style>
+</head>
+<body>
+
+<canvas id="circuit-canvas"></canvas>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">CD</div>
+    <span>CamelDev</span>
+  </a>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="showPage('sobre')" id="tab-sobre">
+      <span class="tab-icon">📘</span> Documentação
+    </button>
+    <button class="nav-tab" onclick="showPage('extractor')" id="tab-extractor">
+      <span class="tab-icon">⚡</span> Extrator XML
+    </button>
+  </div>
+  <div class="nav-end">
+    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+  </div>
+</nav>
+
+<main>
+  <div class="page active" id="page-sobre">
+    <div class="page-header">
+      <div class="page-tag">📘 Módulo Fiscal</div>
+      <h1 class="page-title">Validador & Processador</h1>
+      <p class="page-sub">Solução corporativa local para leitura estrutural, cruzamento relacional entre NF-e/CT-e e renomeação automatizada.</p>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-step">
+        <div class="about-step-num">01</div>
+        <div class="about-step-title">Upload por Lote</div>
+        <div class="about-step-desc">Arraste uma pasta cheia de XMLs corporativos diretamente no container ou clique para selecionar. O processamento é feito em memória local de forma privada.</div>
+      </div>
+      <div class="about-step">
+        <div class="about-step-num">02</div>
+        <div class="about-step-title">Análise Relacional</div>
+        <div class="about-step-desc">O algoritmo identifica automaticamente NF-es e CT-es (independente de letras maiúsculas ou minúsculas nas tags) amarrando os conhecimentos às suas respectivas notas.</div>
+      </div>
+      <div class="about-step">
+        <div class="about-step-num">03</div>
+        <div class="about-step-title">Renomeação Dinâmica</div>
+        <div class="about-step-desc">Tanto NF-es quanto CT-es são salvos usando a **Chave Oficial de 44 dígitos** como nome do arquivo dentro do pacote compactado final.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="icon">⚖️</span> Regras de Negócio Implementadas</div>
+      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Conversão de Unidades:</strong> Se a quantidade de itens estiver expressa em toneladas (<code>TON</code>/<code>TONELADA</code>/<code>T</code>/<code>TL</code>/<code>TO</code>), o motor multiplica automaticamente por 1.000 para converter o volume final e unitário para <code>KG</code>.</p>
+      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Ordenação Customizada:</strong> Conforme solicitado, a coluna de modalidade de frete da nota fiscal é gerada estrategicamente antes do bloco de observações complementares.</p>
+      <p class="page-sub" style="font-size:0.88rem;">• <strong>Filtro Case-Insensitive:</strong> Motor preparado para interpretar as tags <code>infCte</code>, <code>infCTe</code>, <code>infNFe</code> ou <code>infNFE</code> de forma transparente, garantindo compatibilidade total.</p>
+    </div>
+  </div>
+
+  <div class="page" id="page-extractor">
+    <div class="page-header">
+      <div class="page-tag">⚡ Engine Ativa</div>
+      <h1 class="page-title">Processamento em Lote</h1>
+      <p class="page-sub">Insira a pasta contendo as notas e conhecimentos de transporte abaixo para extração e agrupamento dos indicadores.</p>
+    </div>
+
+    <div class="dash-metrics">
+      <div class="metric-card">
+        <div class="metric-label">Total Geral Faturado</div>
+        <div class="metric-value highlight" id="m-total-val">R$ 0,00</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Peso Total Importado</div>
+        <div class="metric-value" id="m-total-peso">0,00 KG</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">XMLs de NF-e</div>
+        <div class="metric-value" id="m-count-nfe">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">XMLs de CT-e</div>
+        <div class="metric-value" id="m-count-cte">0</div>
+      </div>
+    </div>
+
+    <div class="drop-zone" id="drop-zone">
+      <span class="drop-zone-icon">📁</span>
+      <p class="drop-zone-text">Arraste sua pasta de documentos XML aqui</p>
+      <p class="drop-zone-sub">ou clique para selecionar a pasta no seu computador</p>
+      <input type="file" class="file-input-hidden" id="file-uploader" webkitdirectory directory multiple>
+    </div>
+
+    <div class="card" id="card-destinatarios" style="display:none;">
+      <div class="card-title"><span class="icon">🏢</span> Resumo por Destinatário</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Destinatário (Destino)</th>
+              <th>Quantidade de Notas Vinculadas</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-destinos">
+            </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex-between">
+        <div class="card-title" style="margin-bottom:0;"><span class="icon">📊</span> Tabela Consolidada (Apenas NF-e)</div>
+        <div class="btn-group">
+          <button class="btn btn-secondary" id="btn-download-excel" style="display:none;" onclick="downloadExcelSheets()">
+            📊 Baixar Planilha Excel (.xlsx)
+          </button>
+          <button class="btn btn-primary" id="btn-download-zip" style="display:none;" onclick="downloadZipArchive()">
+            📦 Baixar XMLs Renomeados (.zip)
+          </button>
+        </div>
+      </div>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Usina (Emitente)</th>
+              <th>Número da Nota + Série</th>
+              <th>Total Qtd Faturada</th>
+              <th>Valor Faturado</th>
+              <th>Chave da Nota Fiscal</th>
+              <th>CT-e Relacionado</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-principal">
+            <tr>
+              <td colspan="6" style="text-align:center; color:var(--muted); padding:30px;">
+                Nenhum arquivo processado até o momento. Insira documentos para popular a tabela.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="log-box" id="log-console">
+        <span class="log-info">[Sistema] Aguardando a entrada de arquivos fiscais para iniciar o parsing...</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   GERENCIADOR DE ESTADO GLOBAL LOCAL
+   ═══════════════════════════════════════════════════════════ */
+let nfeDatabase = {};
+let cteDatabase = [];
+let xmlFilesToZip = [];
+let rawNfeRowsForExcel = [];
+let rawCteRowsForExcel = [];
+let globalMetrics = {
+  totalValor: 0,
+  totalPeso: 0,
+  countNfe: 0,
+  countCte: 0,
+  destinos: {}
+};
+
+/* ═══════════════════════════════════════════════════════════
+   HELPER: Strip de namespace para compatibilidade total
+   O DOMParser preserva namespaces (xmlns="..."), o que faz
+   getElementsByTagName('infCte') não funcionar quando o
+   documento usa namespace padrão. A solução mais robusta é
+   remover os atributos xmlns do texto antes de parsear,
+   tornando todos os elementos acessíveis sem namespace.
+   ═══════════════════════════════════════════════════════════ */
+function stripNamespaces(xmlText) {
+  // Remove xmlns declarations e prefixos de namespace das tags
+  return xmlText
+    .replace(/xmlns(?::\w+)?="[^"]*"/g, '')   // remove xmlns="..." e xmlns:xxx="..."
+    .replace(/<(\/?)\w+:/g, '<$1');             // remove prefixos tipo <cte: → <
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MIGRAÇÃO DE ABAS / PÁGINAS
+   ═══════════════════════════════════════════════════════════ */
+function showPage(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`page-${pageId}`).classList.add('active');
+  document.getElementById(`tab-${pageId}`).classList.add('active');
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const target = current === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', target);
+  document.querySelector('.theme-btn').innerText = target === 'light' ? '☀️' : '🌙';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DRAG & DROP EVENTS
+   ═══════════════════════════════════════════════════════════ */
+const dropZone = document.getElementById('drop-zone');
+const fileUploader = document.getElementById('file-uploader');
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+    handleFilesInput(e.dataTransfer.files);
+  }
+});
+fileUploader.addEventListener('change', (e) => {
+  if (e.target.files && e.target.files.length) {
+    handleFilesInput(e.target.files);
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   PROCESSADOR LOTE PRINCIPAL
+   ═══════════════════════════════════════════════════════════ */
+async function handleFilesInput(fileList) {
+  const logger = document.getElementById('log-console');
+  logger.innerHTML = '';
+
+  // Reset de estado
+  nfeDatabase = {};
+  cteDatabase = [];
+  xmlFilesToZip = [];
+  rawNfeRowsForExcel = [];
+  rawCteRowsForExcel = [];
+  globalMetrics = { totalValor: 0, totalPeso: 0, countNfe: 0, countCte: 0, destinos: {} };
+
+  // Esconde botões e cards até processar
+  document.getElementById('btn-download-zip').style.display = 'none';
+  document.getElementById('btn-download-excel').style.display = 'none';
+  document.getElementById('card-destinatarios').style.display = 'none';
+
+  addLog('Iniciando varredura por lote dos documentos selecionados...', 'info');
+
+  const arquivosXml = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.xml'));
+
+  if (arquivosXml.length === 0) {
+    addLog('Nenhum arquivo válido com extensão .xml foi detectado na seleção.', 'err');
+    return;
+  }
+
+  addLog(`${arquivosXml.length} arquivo(s) XML encontrado(s). Processando...`, 'info');
+
+  for (const file of arquivosXml) {
+    try {
+      const textContent = await readFileAsText(file);
+      parseXmlDocument(textContent, file.name);
+    } catch (err) {
+      addLog(`Falha crítica na leitura de ${file.name}: ${err.message}`, 'err');
+    }
+  }
+
+  crossReferenceDocuments();
+  compileAndRenderInterface();
+}
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = (e) => reject(e);
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOTOR DE DETECÇÃO (COM STRIP DE NAMESPACE)
+   ─────────────────────────────────────────────────────────
+   PROBLEMA ORIGINAL: DOMParser mantém o namespace do documento.
+   Quando o XML tem xmlns="http://www.portalfiscal.inf.br/cte",
+   getElementsByTagName('infCte') retorna HTMLCollection vazia
+   porque o browser trata as tags como pertencentes ao namespace
+   do portal fiscal, não ao namespace vazio.
+   
+   SOLUÇÃO: stripNamespaces() remove todos os xmlns antes do
+   parse, deixando as tags sem namespace e totalmente acessíveis.
+   ═══════════════════════════════════════════════════════════ */
+function parseXmlDocument(xmlText, fallbackName) {
+  // Aplica strip de namespace antes de parsear
+  const cleanXml = stripNamespaces(xmlText);
+
+  const parser = new DOMParser();
+  const xmlDoc = parser.parseFromString(cleanXml, 'text/xml');
+
+  // Verifica erro de parse
+  const parseError = xmlDoc.querySelector('parsererror');
+  if (parseError) {
+    addLog(`Erro de sintaxe XML em: ${fallbackName}`, 'err');
+    return;
+  }
+
+  // Detecção robusta: verifica tags raiz e tags infCte / infNFe
+  // Após strip, todas as tags são acessíveis sem namespace
+  const infNFeNode = xmlDoc.querySelector('infNFe, infNfe, infNFE');
+  const infCteNode = xmlDoc.querySelector('infCte, infCTe, infCTE');
+
+  // Também verifica pela tag raiz do documento para desambiguar
+  const rootTag = xmlDoc.documentElement ? xmlDoc.documentElement.tagName.toLowerCase() : '';
+  const isCteByRoot = rootTag.includes('cteproc') || rootTag.includes('cte');
+  const isNfeByRoot = rootTag.includes('nfeproc') || rootTag.includes('nfe');
+
+  if (infCteNode && (isCteByRoot || !infNFeNode)) {
+    processCteNode(xmlDoc, xmlText, infCteNode);
+  } else if (infNFeNode) {
+    processNfeNode(xmlDoc, xmlText, infNFeNode);
+  } else {
+    addLog(`Arquivo ignorado — tipo fiscal não reconhecido: ${fallbackName}`, 'warn');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PARSER NF-e
+   ═══════════════════════════════════════════════════════════ */
+function processNfeNode(xmlDoc, rawText, infNFeNode) {
+  // Helper: pega o primeiro texto de uma tag no documento inteiro
+  const g = (tag) => {
+    const els = xmlDoc.getElementsByTagName(tag);
+    return els.length ? els[0].textContent.trim() : '';
+  };
+
+  // Extrai chave do atributo Id (ex: "NFe35260508110543...")
+  let chave = infNFeNode.getAttribute('Id') || '';
+  chave = chave.replace(/\D/g, '').trim();
+
+  if (!chave) {
+    addLog('NF-e ignorada: atributo Id não encontrado no nó infNFe.', 'warn');
+    return;
+  }
+
+  const nNF    = g('nNF')  || '—';
+  const serie  = g('serie') || '—';
+
+  const emit = xmlDoc.getElementsByTagName('emit')[0];
+  const usina    = emit ? (emit.getElementsByTagName('xNome')[0]?.textContent?.trim() || emit.getElementsByTagName('xFant')[0]?.textContent?.trim() || 'Desconhecido') : 'Desconhecido';
+  const emitCNPJ = emit ? (emit.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || emit.getElementsByTagName('CPF')[0]?.textContent?.trim() || '') : '';
+
+  const dest = xmlDoc.getElementsByTagName('dest')[0];
+  const destinoNome = dest ? (dest.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Destino Não Informado') : 'Destino Não Informado';
+  const destCNPJ    = dest ? (dest.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || dest.getElementsByTagName('CPF')[0]?.textContent?.trim() || '') : '';
+
+  const dhEmi         = g('dhEmi') || g('dEmi') || '';
+  const dataFormatada = dhEmi.substring(0, 10);
+
+  // Valor total da NF — busca dentro de ICMSTot para maior precisão
+  const icmsTot = xmlDoc.getElementsByTagName('ICMSTot')[0];
+  const vNF = icmsTot ? parseFloat(icmsTot.getElementsByTagName('vNF')[0]?.textContent || '0') : parseFloat(g('vNF') || '0');
+
+  const infCpl = g('infCpl') || '';
+
+  // Dados de entrega
+  const entrega = xmlDoc.getElementsByTagName('entrega')[0];
+  const entCNPJ = entrega ? (entrega.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
+  const entNome = entrega ? (entrega.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Não Informado') : 'Não Informado';
+  const entMun  = entrega ? (entrega.getElementsByTagName('xMun')[0]?.textContent?.trim() || '') : '';
+  const entUF   = entrega ? (entrega.getElementsByTagName('UF')[0]?.textContent?.trim()  || '') : '';
+
+  // Modalidade de frete
+  const modFreteCod = g('modFrete');
+  const modFreteMap = { '0': '0 - CIF (Emitente)', '1': '1 - FOB (Destinatário)', '2': '2 - Terceiros', '3': '3 - Próprio (Remetente)', '4': '4 - Próprio (Destinatário)', '9': '9 - Sem Frete' };
+  const modFreteDesc = modFreteMap[modFreteCod] || 'Não Informado';
+
+  // Itens (det)
+  let pesoAcumulado = 0;
+  const detList = xmlDoc.getElementsByTagName('det');
+
+  for (let i = 0; i < detList.length; i++) {
+    const detNode = detList[i];
+    const nItem   = detNode.getAttribute('nItem') || String(i + 1);
+    const prod    = detNode.getElementsByTagName('prod')[0];
+
+    if (!prod) continue;
+
+    const cProd = prod.getElementsByTagName('cProd')[0]?.textContent?.trim() || '';
+    const xProd = prod.getElementsByTagName('xProd')[0]?.textContent?.trim() || '';
+    const ncm   = prod.getElementsByTagName('NCM')[0]?.textContent?.trim()  || '';
+    const cfop  = prod.getElementsByTagName('CFOP')[0]?.textContent?.trim() || '';
+
+    let uCom   = (prod.getElementsByTagName('uCom')[0]?.textContent || '').toUpperCase().trim();
+    let qCom   = parseFloat(prod.getElementsByTagName('qCom')[0]?.textContent || '0');
+    let vUnCom = parseFloat(prod.getElementsByTagName('vUnCom')[0]?.textContent || '0');
+    const vProd = parseFloat(prod.getElementsByTagName('vProd')[0]?.textContent || '0');
+
+    // Conversão TON → KG
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO' || uCom === 'TL') {
+      qCom   = qCom * 1000;
+      vUnCom = vUnCom / 1000;
+      uCom   = 'KG';
+    }
+
+    pesoAcumulado += qCom;
+
+    rawNfeRowsForExcel.push({
+      'CHAVE_ACESSO (ID)':        chave,
+      'NUMERO_DOC':               parseInt(nNF)   || 0,
+      'SERIE':                    parseInt(serie) || 0,
+      'DATA_EMISSAO':             dataFormatada,
+      'NOME_EMITENTE':            usina,
+      'CNPJ_EMITENTE':            fmtCNPJ(emitCNPJ),
+      'NOME_DESTINATARIO':        destinoNome,
+      'CNPJ_DESTINATARIO':        fmtCNPJ(destCNPJ),
+      'VALOR_TOTAL_NF':           vNF,
+      'ENTREGA_CNPJ':             fmtCNPJ(entCNPJ),
+      'ENTREGA_RAZAO_SOCIAL':     entNome,
+      'ENTREGA_MUNICIPIO':        entMun,
+      'ENTREGA_UF':               entUF,
+      'NUM_ITEM':                 parseInt(nItem) || 0,
+      'COD_PRODUTO':              cProd,
+      'DESCRICAO_PRODUTO':        xProd,
+      'NCM':                      ncm,
+      'CFOP':                     cfop,
+      'UNIDADE_MEDIDA':           uCom,
+      'QTD_COMERCIAL (KG)':       qCom,
+      'VALOR_UNITARIO (KG)':      vUnCom,
+      'VALOR_TOTAL_ITEM':         vProd,
+      'OBSERVACOES_COMPLEMENTARES': infCpl
+    });
+  }
+
+  nfeDatabase[chave] = {
+    usina:       usina,
+    notaSerie:   `${nNF} / Série: ${serie}`,
+    quantidade:  pesoAcumulado,
+    valor:       vNF,
+    chave:       chave,
+    destinatario: destinoNome,
+    cteVinculado: '—'
+  };
+
+  xmlFilesToZip.push({ filename: `${chave}.xml`, content: rawText });
+
+  globalMetrics.countNfe++;
+  globalMetrics.totalValor += vNF;
+  globalMetrics.totalPeso  += pesoAcumulado;
+  globalMetrics.destinos[destinoNome] = (globalMetrics.destinos[destinoNome] || 0) + 1;
+
+  addLog(`NF-e identificada  ✓  Chave: ...${chave.slice(-14)}  |  ${usina}`, 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PARSER CT-e
+   ═══════════════════════════════════════════════════════════ */
+function processCteNode(xmlDoc, rawText, infCteNode) {
+  const g = (tag) => {
+    const els = xmlDoc.getElementsByTagName(tag);
+    return els.length ? els[0].textContent.trim() : '';
+  };
+
+  // Extrai chave do atributo Id (ex: "CTe35260524858015...")
+  let chaveCte = infCteNode.getAttribute('Id') || '';
+  chaveCte = chaveCte.replace(/\D/g, '').trim();
+
+  if (!chaveCte) {
+    addLog('CT-e ignorado: atributo Id não encontrado no nó infCte.', 'warn');
+    return;
+  }
+
+  const nCT   = g('nCT')   || '—';
+  const serie = g('serie') || '—';
+
+  const dhEmi         = g('dhEmi') || '';
+  const dataFormatada = dhEmi.substring(0, 10);
+
+  const emit = xmlDoc.getElementsByTagName('emit')[0];
+  const emitNome = emit ? (emit.getElementsByTagName('xNome')[0]?.textContent?.trim() || '') : '';
+  const emitCNPJ = emit ? (emit.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
+
+  const dest = xmlDoc.getElementsByTagName('dest')[0];
+  const destNome = dest ? (dest.getElementsByTagName('xNome')[0]?.textContent?.trim() || '') : '';
+  const destCNPJ = dest ? (dest.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
+
+  const rem = xmlDoc.getElementsByTagName('rem')[0];
+  const remeteNome = rem ? (rem.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Não Informado') : 'Não Informado';
+
+  // Valor total do frete
+  const vTPrest = parseFloat(g('vTPrest') || '0');
+
+  // Observações — busca em xObs dentro de compl
+  const complNode = xmlDoc.getElementsByTagName('compl')[0];
+  const xObs = complNode ? (complNode.getElementsByTagName('xObs')[0]?.textContent?.trim() || '') : g('xObs');
+
+  // Tomador do frete (toma3 = tomador padrão, toma4 = terceiro nomeado)
+  const toma3 = xmlDoc.getElementsByTagName('toma3')[0];
+  const toma4 = xmlDoc.getElementsByTagName('toma4')[0];
+  let tomaFreteDesc = 'Outros';
+
+  if (toma3) {
+    const tCod = toma3.getElementsByTagName('toma')[0]?.textContent?.trim() || '';
+    const tomaMap = { '0': '0 - Remetente', '1': '1 - Expedidor', '2': '2 - Recebedor', '3': '3 - Destinatário' };
+    tomaFreteDesc = tomaMap[tCod] || 'Outros';
+  } else if (toma4) {
+    const tCod = toma4.getElementsByTagName('toma')[0]?.textContent?.trim() || '';
+    // toma4: código 4 = Outros (tomador identificado pelo CNPJ/CPF)
+    const tNome = toma4.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Terceiro';
+    tomaFreteDesc = tCod === '4' ? `4 - Outros (${tNome})` : tNome;
+  }
+
+  // Chaves de NF-e referenciadas dentro de infDoc/infNFe/chave
+  const chavesReferenciadas = [];
+  const infDocNode = xmlDoc.getElementsByTagName('infDoc')[0];
+  if (infDocNode) {
+    const infNFeTags = infDocNode.getElementsByTagName('infNFe');
+    for (let i = 0; i < infNFeTags.length; i++) {
+      const chRef = infNFeTags[i].getElementsByTagName('chave')[0]?.textContent?.trim() || '';
+      if (chRef) chavesReferenciadas.push(chRef);
+    }
+  }
+
+  // Fallback: busca global por <chave> se infDoc não encontrou nada
+  if (chavesReferenciadas.length === 0) {
+    const allChaves = xmlDoc.getElementsByTagName('chave');
+    for (let i = 0; i < allChaves.length; i++) {
+      const c = allChaves[i].textContent.trim();
+      // Chave de NF-e tem 44 dígitos numéricos e não é a própria chave do CT-e
+      if (/^\d{44}$/.test(c) && c !== chaveCte) {
+        chavesReferenciadas.push(c);
+      }
+    }
+  }
+
+  const chavesStr = chavesReferenciadas.length > 0 ? chavesReferenciadas.join(' | ') : 'Nenhuma detectada';
+
+  rawCteRowsForExcel.push({
+    'CHAVE_ACESSO (ID)':    chaveCte,
+    'CHAVE_NFE_REFERENCIADA': chavesStr,
+    'NUMERO_DOC':           parseInt(nCT)   || 0,
+    'SERIE':                parseInt(serie) || 0,
+    'DATA_EMISSAO':         dataFormatada,
+    'NOME_EMITENTE':        emitNome,
+    'CNPJ_EMITENTE':        fmtCNPJ(emitCNPJ),
+    'NOME_DESTINATARIO':    destNome,
+    'CNPJ_DESTINATARIO':    fmtCNPJ(destCNPJ),
+    'VALOR_TOTAL_FRETE':    vTPrest,
+    'TOMADOR_FRETE':        tomaFreteDesc,
+    'REMETENTE':            remeteNome,
+    'OBSERVACOES':          xObs
+  });
+
+  cteDatabase.push({
+    chaveCte:    chaveCte,
+    nfeAlvoList: chavesReferenciadas
+  });
+
+  xmlFilesToZip.push({ filename: `${chaveCte}.xml`, content: rawText });
+
+  globalMetrics.countCte++;
+  addLog(`CT-e identificado  ✓  Chave: ...${chaveCte.slice(-14)}  |  ${chavesReferenciadas.length} NF(s) vinculada(s)`, 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CRUZAMENTO RELACIONAL CT-e ↔ NF-e
+   ═══════════════════════════════════════════════════════════ */
+function crossReferenceDocuments() {
+  if (cteDatabase.length === 0) return;
+  addLog(`Cruzando ${cteDatabase.length} CT-e(s) com as NF-es carregadas...`, 'info');
+
+  cteDatabase.forEach(cte => {
+    cte.nfeAlvoList.forEach(nfeChave => {
+      if (nfeDatabase[nfeChave]) {
+        nfeDatabase[nfeChave].cteVinculado = cte.chaveCte;
+      }
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDERIZAÇÃO DA INTERFACE
+   ═══════════════════════════════════════════════════════════ */
+function compileAndRenderInterface() {
+  // Métricas
+  document.getElementById('m-total-val').innerText  = globalMetrics.totalValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('m-total-peso').innerText = globalMetrics.totalPeso.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' KG';
+  document.getElementById('m-count-nfe').innerText  = globalMetrics.countNfe;
+  document.getElementById('m-count-cte').innerText  = globalMetrics.countCte;
+
+  // Tabela de destinatários
+  const tbodyDestinos      = document.getElementById('tbody-destinos');
+  const cardDestinatarios  = document.getElementById('card-destinatarios');
+  tbodyDestinos.innerHTML  = '';
+  const listaDestinos      = Object.keys(globalMetrics.destinos);
+
+  if (listaDestinos.length > 0) {
+    cardDestinatarios.style.display = 'block';
+    listaDestinos.forEach(dest => {
+      const row = document.createElement('tr');
+      row.innerHTML = `<td><strong>${dest}</strong></td><td class="mono">${globalMetrics.destinos[dest]} nota(s)</td>`;
+      tbodyDestinos.appendChild(row);
+    });
+  }
+
+  // Tabela principal NF-e
+  const tbodyPrincipal    = document.getElementById('tbody-principal');
+  tbodyPrincipal.innerHTML = '';
+  const chavesNfe          = Object.keys(nfeDatabase);
+
+  if (chavesNfe.length === 0) {
+    tbodyPrincipal.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px;">Nenhuma NF-e processada. Insira arquivos para popular os dados.</td></tr>`;
+  } else {
+    chavesNfe.forEach(chave => {
+      const item = nfeDatabase[chave];
+      const tr   = document.createElement('tr');
+      const cteLabel = item.cteVinculado !== '—'
+        ? `<span style="color:var(--yellow);font-weight:600;">${item.cteVinculado}</span>`
+        : `<span style="color:var(--muted2)">—</span>`;
+
+      tr.innerHTML = `
+        <td>${item.usina}</td>
+        <td class="mono">${item.notaSerie}</td>
+        <td class="mono">${item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} KG</td>
+        <td class="mono" style="color:var(--green);font-weight:500;">${item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
+        <td class="mono" style="font-size:0.75rem;color:var(--muted);" title="${item.chave}">${item.chave}</td>
+        <td class="mono" style="font-size:0.75rem;">${cteLabel}</td>
+      `;
+      tbodyPrincipal.appendChild(tr);
+    });
+  }
+
+  // Botões de download
+  const temDados = xmlFilesToZip.length > 0;
+  document.getElementById('btn-download-zip').style.display   = temDados ? 'inline-flex' : 'none';
+  document.getElementById('btn-download-excel').style.display = temDados ? 'inline-flex' : 'none';
+
+  addLog(`Processamento concluído: ${globalMetrics.countNfe} NF-e(s) | ${globalMetrics.countCte} CT-e(s) — Downloads disponíveis.`, 'info');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORTADOR EXCEL — DUAS ABAS (NF-e e CT-e)
+   ═══════════════════════════════════════════════════════════ */
+function downloadExcelSheets() {
+  if (rawNfeRowsForExcel.length === 0 && rawCteRowsForExcel.length === 0) {
+    addLog('Nenhum registro encontrado para exportar.', 'warn');
+    return;
+  }
+
+  addLog('Gerando planilha Excel com abas NF-e e CT-e...', 'info');
+  const wb = XLSX.utils.book_new();
+
+  const headerNfe = [
+    'CHAVE_ACESSO (ID)', 'NUMERO_DOC', 'SERIE', 'DATA_EMISSAO', 'NOME_EMITENTE',
+    'CNPJ_EMITENTE', 'NOME_DESTINATARIO', 'CNPJ_DESTINATARIO', 'VALOR_TOTAL_NF',
+    'ENTREGA_CNPJ', 'ENTREGA_RAZAO_SOCIAL', 'ENTREGA_MUNICIPIO', 'ENTREGA_UF',
+    'NUM_ITEM', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'NCM', 'CFOP', 'UNIDADE_MEDIDA',
+    'QTD_COMERCIAL (KG)', 'VALOR_UNITARIO (KG)', 'VALOR_TOTAL_ITEM', 'OBSERVACOES_COMPLEMENTARES'
+  ];
+
+  const headerCte = [
+    'CHAVE_ACESSO (ID)', 'CHAVE_NFE_REFERENCIADA', 'NUMERO_DOC', 'SERIE', 'DATA_EMISSAO',
+    'NOME_EMITENTE', 'CNPJ_EMITENTE', 'NOME_DESTINATARIO', 'CNPJ_DESTINATARIO',
+    'VALOR_TOTAL_FRETE', 'TOMADOR_FRETE', 'REMETENTE', 'OBSERVACOES'
+  ];
+
+  if (rawNfeRowsForExcel.length > 0) {
+    const wsNfe = XLSX.utils.json_to_sheet(rawNfeRowsForExcel, { header: headerNfe });
+    XLSX.utils.book_append_sheet(wb, wsNfe, 'NF-e');
+  } else {
+    // Aba vazia com cabeçalho
+    const wsNfe = XLSX.utils.aoa_to_sheet([headerNfe]);
+    XLSX.utils.book_append_sheet(wb, wsNfe, 'NF-e');
+  }
+
+  if (rawCteRowsForExcel.length > 0) {
+    const wsCte = XLSX.utils.json_to_sheet(rawCteRowsForExcel, { header: headerCte });
+    XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
+  } else {
+    const wsCte = XLSX.utils.aoa_to_sheet([headerCte]);
+    XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
+  }
+
+  const hoje = new Date().toISOString().substring(0, 10);
+  XLSX.writeFile(wb, `CamelDev_Relatorio_${hoje}.xlsx`);
+  addLog('Planilha Excel gerada com sucesso!', 'ok');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORTADOR ZIP — XMLs RENOMEADOS PELA CHAVE OFICIAL
+   ═══════════════════════════════════════════════════════════ */
+function downloadZipArchive() {
+  if (xmlFilesToZip.length === 0) return;
+
+  addLog('Comprimindo XMLs renomeados pelas chaves oficiais...', 'info');
+  const zip = new JSZip();
+
+  xmlFilesToZip.forEach(file => { zip.file(file.filename, file.content); });
+
+  zip.generateAsync({ type: 'blob' }).then(content => {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(content);
+    link.download = `XMLs_Renomeados_CamelDev_${new Date().toISOString().substring(0, 10)}.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addLog('ZIP baixado com sucesso!', 'ok');
+  }).catch(err => {
+    addLog(`Erro ao criar ZIP: ${err.message}`, 'err');
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITÁRIOS
+   ═══════════════════════════════════════════════════════════ */
+function addLog(text, type) {
+  const consoleLog = document.getElementById('log-console');
+  const span       = document.createElement('span');
+  span.className   = `log-line log-${type}`;
+  span.innerText   = `[${new Date().toLocaleTimeString()}] ${text}`;
+  consoleLog.appendChild(span);
+  consoleLog.appendChild(document.createElement('br'));
+  consoleLog.scrollTop = consoleLog.scrollHeight;
+}
+
+function fmtCNPJ(v) {
+  if (!v) return '';
+  const n = v.replace(/\D/g, '');
+  if (n.length === 14) return n.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+  if (n.length === 11) return n.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+  return n;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CANVAS BACKGROUND ANIMATION
+   ═══════════════════════════════════════════════════════════ */
+const canvas = document.getElementById('circuit-canvas');
+if (canvas) {
+  const ctx = canvas.getContext('2d');
+  let width  = canvas.width  = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
+
+  window.addEventListener('resize', () => {
+    width  = canvas.width  = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
+
+  function drawNodes() {
+    ctx.clearRect(0, 0, width, height);
+    ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light'
+      ? 'rgba(17,203,7,0.10)' : 'rgba(17,203,7,0.04)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i < width;  i += 60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke(); }
+    for (let j = 0; j < height; j += 60) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke(); }
+  }
+
+  setInterval(drawNodes, 2000);
+  drawNodes();
+}
+</script>
+
+</body>
+</html>
