@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CamelDev · XML Extractor & Processor v5</title>
+<title>CamelDev · XML Extractor & Processor v6</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 
 <style>
 /* ═══════════════════════════════════════════
@@ -54,9 +54,14 @@ body{
   min-height:100vh;
 }
 
+/* ═══════════════════════════════════════════
+   FEATURE 08 — CANVAS CIRCUIT/NEURAL BACKGROUND
+   Substituição completa do fundo original por
+   circuitos neon animados com fluxo de energia
+   ═══════════════════════════════════════════ */
 #circuit-canvas{
   position:fixed;top:0;left:0;width:100%;height:100%;
-  z-index:0;pointer-events:none;opacity:.15;
+  z-index:0;pointer-events:none;
 }
 
 /* ═══════════════════════════════════════════
@@ -82,10 +87,10 @@ nav{
   width:34px;height:34px;border-radius:8px;
   background:linear-gradient(135deg,var(--green),#0da604);
   display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:900;color:#fff;
+  font-size:13px;font-weight:900;color:#fff;
   box-shadow:0 0 14px var(--green-glow);
+  font-family:'Syne',sans-serif;
 }
-
 .nav-center{
   display:flex;align-items:center;gap:4px;
   flex:1;justify-content:center;
@@ -101,17 +106,16 @@ nav{
   color:var(--green);background:var(--green-dim);
   border:1px solid var(--green-border);
 }
-
 .nav-end{display:flex;align-items:center;gap:8px;}
 .theme-btn{
   width:38px;height:38px;border-radius:50%;
   border:1px solid var(--border);background:transparent;
-  cursor:pointer;font-size:16px;color:var(--text);
+  cursor:pointer;color:var(--text);
   display:flex;align-items:center;justify-content:center;
 }
 
 /* ═══════════════════════════════════════════
-   MAIN CONTENT & LAYOUT BOUNDS
+   MAIN CONTENT & LAYOUT
    ═══════════════════════════════════════════ */
 main{position:relative;z-index:1;padding-top:var(--nav-h);min-height:100vh;}
 .page{display:none;padding:40px 5% 60px;animation:fadeIn .35s ease}
@@ -136,96 +140,37 @@ main{position:relative;z-index:1;padding-top:var(--nav-h);min-height:100vh;}
 /* ═══════════════════════════════════════════
    DASHBOARD METRIC CARDS
    ═══════════════════════════════════════════ */
-.dash-metrics {
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-  gap:16px;
-  margin-bottom:28px;
-}
-.metric-card {
-  background:var(--card2);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:20px;
-  transition:all .3s;
-}
-.metric-card:hover { border-color:var(--green-border); }
-.metric-label {
-  font-family:'JetBrains Mono', monospace;
-  font-size:0.75rem;
-  color:var(--muted);
-  text-transform:uppercase;
-  margin-bottom:6px;
-}
-.metric-value {
-  font-family:'Inter', system-ui, sans-serif;
-  font-size:1.75rem;
-  font-weight:800;
-  letter-spacing: -0.03em;
-  color:var(--text);
-}
-.metric-value.highlight { color:var(--green); }
+.dash-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px;}
+.metric-card{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;transition:all .3s;}
+.metric-card:hover{border-color:var(--green-border);}
+.metric-label{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
+.metric-value{font-family:'Inter',system-ui,sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-0.03em;color:var(--text);}
+.metric-value.highlight{color:var(--green);}
 
 /* ═══════════════════════════════════════════
    DRAG & DROP ZONE
    ═══════════════════════════════════════════ */
-.drop-zone {
-  background:var(--card);
-  border:2px dashed var(--border);
-  border-radius:14px;
-  padding:50px 30px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .25s ease;
-  margin-bottom:28px;
-  position:relative;
+.drop-zone{
+  background:var(--card);border:2px dashed var(--border);
+  border-radius:14px;padding:50px 30px;text-align:center;
+  cursor:pointer;transition:all .25s ease;margin-bottom:28px;position:relative;
 }
-.drop-zone:hover, .drop-zone.dragover {
-  border-color:var(--green);
-  background:var(--green-dim);
-}
-.drop-zone-icon {
-  font-size:2.5rem;
-  margin-bottom:14px;
-  display:block;
-  pointer-events: none;
-}
-.drop-zone-text {
-  font-size:1rem;
-  font-weight:600;
-  margin-bottom:6px;
-  pointer-events: none;
-}
-.drop-zone-sub {
-  font-size:0.82rem;
-  color:var(--muted);
-  pointer-events: none;
-}
-.file-input-hidden {
-  position:absolute;
-  top:0; left:0; width:100%; height:100%;
-  opacity:0; cursor:pointer;
-  z-index: 10;
-}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--green);background:var(--green-dim);}
+.drop-zone-icon{margin-bottom:14px;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.drop-zone-text{font-size:1rem;font-weight:600;margin-bottom:6px;pointer-events:none;}
+.drop-zone-sub{font-size:0.82rem;color:var(--muted);pointer-events:none;}
+.file-input-hidden{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:10;}
 
 /* ═══════════════════════════════════════════
-   TABLES & GENERAL INTERFACE COMPONENTS
+   TABLES & CARDS
    ═══════════════════════════════════════════ */
-.card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:28px;margin-bottom:24px;
-}
-.card-title{
-  font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;
-  margin-bottom:16px;display:flex;align-items:center;gap:8px;
-}
-.card-title .icon{font-size:1.1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:24px;}
+.card-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 
 .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 thead th{
-  background:rgba(17,203,7,0.07);
-  color:var(--green);font-weight:600;
+  background:rgba(17,203,7,0.07);color:var(--green);font-weight:600;
   padding:12px 14px;text-align:left;
   border-bottom:1px solid var(--green-border);
   font-family:'JetBrains Mono',monospace;font-size:.78rem;
@@ -235,6 +180,9 @@ tbody td{padding:11px 14px;border-bottom:1px solid var(--border);color:var(--tex
 tbody tr:hover td{background:rgba(17,203,7,0.03)}
 .mono{font-family:'JetBrains Mono',monospace;font-size:.82rem;}
 
+/* ═══════════════════════════════════════════
+   BUTTONS — PADRÃO CAMELDEV
+   ═══════════════════════════════════════════ */
 .btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:10px 22px;border-radius:9px;
@@ -243,42 +191,295 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
 }
 .btn-primary{background:var(--green);color:#fff;box-shadow:0 0 20px var(--green-glow);}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 32px var(--green-glow)}
-.btn-secondary{background:var(--card2); color:var(--text); border:1px solid var(--border); margin-right:8px;}
+.btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border);margin-right:8px;}
 .btn-secondary:hover{border-color:var(--green-border);}
 
-.about-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-  gap:18px;margin-bottom:32px;
+/* ═══════════════════════════════════════════
+   FEATURE 02 — BOTÃO DETALHAR
+   Estilo neon verde suave com glow e hover
+   ═══════════════════════════════════════════ */
+.btn-detalhar{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:7px;font-size:.78rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(17,203,7,0.35);
+  background:rgba(17,203,7,0.09);color:var(--green);
+  font-family:'Inter',sans-serif;
+  transition:all .2s ease;
+  box-shadow:0 0 8px rgba(17,203,7,0.08);
+  white-space:nowrap;
 }
-.about-step{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:24px;position:relative;
+.btn-detalhar:hover{
+  background:rgba(17,203,7,0.18);
+  border-color:rgba(17,203,7,0.6);
+  box-shadow:0 0 16px rgba(17,203,7,0.22);
+  transform:translateY(-1px);
 }
-.about-step-num{
-  font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;
-  color:var(--green-border);margin-bottom:10px;line-height:1;
-}
+
+/* ═══════════════════════════════════════════
+   ABOUT GRID
+   ═══════════════════════════════════════════ */
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-bottom:32px;}
+.about-step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;position:relative;}
+.about-step-num{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:var(--green-border);margin-bottom:10px;line-height:1;}
 .about-step-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:8px}
 .about-step-desc{font-size:.84rem;color:var(--muted);line-height:1.6}
 
-.log-box {
+/* ═══════════════════════════════════════════
+   LOG BOX
+   ═══════════════════════════════════════════ */
+.log-box{
   background:#020603;border:1px solid var(--green-border);
   border-radius:10px;padding:16px;max-height:200px;overflow-y:auto;
   font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.7;color:var(--muted);
   margin-top:16px;
 }
-.log-ok { color:var(--green); }
-.log-info { color:#5bc8fa; }
-.log-warn { color:var(--yellow); }
-.log-err { color:var(--red); }
+.log-ok{color:var(--green);}
+.log-info{color:#5bc8fa;}
+.log-warn{color:var(--yellow);}
+.log-err{color:var(--red);}
 
 .divider{height:1px;margin:28px 0;background:linear-gradient(to right,var(--green-border),transparent);}
-.flex-between { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; }
-.btn-group { display:flex; gap:8px; }
+.flex-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════════════
+   FEATURE 03 — MODAL DE VISUALIZAÇÃO
+   Overlay escurecido + blur na tela principal
+   Animações suaves de abertura e fechamento
+   ═══════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:1000;
+  background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:0;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;
+}
+.modal-overlay.open{
+  opacity:1;pointer-events:all;
+}
+.modal-container{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:0 0 16px 16px;
+  width:100%;max-width:900px;
+  max-height:100vh;
+  display:flex;flex-direction:column;
+  transform:translateY(-30px);
+  transition:transform .35s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 24px 80px rgba(0,0,0,0.6);
+  overflow:hidden;
+}
+.modal-overlay.open .modal-container{
+  transform:translateY(0);
+}
+
+/* FEATURE 03 — BARRA SUPERIOR DO MODAL */
+.modal-topbar{
+  display:flex;align-items:center;gap:4px;
+  padding:12px 16px;
+  background:rgba(6,9,15,0.8);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.modal-nav-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:7px;
+  font-size:.82rem;font-weight:600;cursor:pointer;
+  border:1px solid var(--border);
+  background:transparent;color:var(--muted);
+  font-family:'Inter',sans-serif;
+  transition:all .2s;
+}
+.modal-nav-btn:hover{color:var(--text);background:rgba(255,255,255,0.05);border-color:var(--green-border);}
+.modal-nav-btn.active{
+  color:var(--green);background:var(--green-dim);border-color:var(--green-border);
+  box-shadow:0 0 10px rgba(17,203,7,0.12);
+}
+.modal-nav-btn.btn-voltar{color:var(--muted);}
+.modal-nav-btn.btn-voltar:hover{color:var(--red);border-color:rgba(255,68,68,0.3);}
+
+/* Separador e info do documento no topbar */
+.modal-topbar-sep{width:1px;height:28px;background:var(--border);margin:0 4px;}
+.modal-topbar-info{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;color:var(--muted2);
+}
+
+/* Conteúdo scrollável do modal */
+.modal-body{
+  flex:1;overflow-y:auto;padding:32px;
+}
+
+/* ═══════════════════════════════════════════
+   FEATURE 04 / 05 — DOCUMENT VIEWER
+   Layout visual para NF-e e CT-e reconstruídos
+   ═══════════════════════════════════════════ */
+.doc-viewer{font-family:'Inter',sans-serif;}
+.doc-header{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:20px;margin-bottom:28px;flex-wrap:wrap;
+}
+.doc-header-left{flex:1;min-width:220px;}
+.doc-header-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px;}
+
+.doc-tipo-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 12px;border-radius:100px;
+  border:1px solid var(--green-border);background:var(--green-dim);
+  font-size:.72rem;font-weight:700;color:var(--green);
+  font-family:'JetBrains Mono',monospace;text-transform:uppercase;
+  margin-bottom:8px;
+}
+.doc-chave{
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;
+  color:var(--muted);word-break:break-all;margin-bottom:4px;
+  background:var(--card2);padding:6px 10px;border-radius:6px;
+  border:1px solid var(--border);
+}
+.doc-numero{
+  font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;
+  color:var(--text);letter-spacing:-0.5px;
+}
+.doc-data{font-size:.82rem;color:var(--muted);margin-top:2px;}
+
+
+
+/* Seções do documento */
+.doc-section{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:20px;margin-bottom:16px;
+}
+.doc-section-title{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  font-weight:700;color:var(--green);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+}
+.doc-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;
+}
+.doc-field{display:flex;flex-direction:column;gap:3px;}
+.doc-field-label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.doc-field-value{font-size:.9rem;font-weight:500;color:var(--text);}
+
+/* Tabela de produtos */
+.doc-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px;}
+.doc-table thead th{
+  background:rgba(17,203,7,0.07);color:var(--green);
+  padding:8px 10px;text-align:left;
+  border-bottom:1px solid var(--green-border);
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;
+}
+.doc-table tbody td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text);}
+.doc-table tbody tr:hover td{background:rgba(17,203,7,0.03);}
+.doc-totals{
+  display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;
+  padding:14px 16px;background:var(--card2);border-radius:8px;
+  border:1px solid var(--border);
+}
+.doc-total-item{display:flex;flex-direction:column;gap:2px;}
+.doc-total-label{font-size:.68rem;color:var(--muted);text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.doc-total-value{font-size:1.05rem;font-weight:700;color:var(--green);}
+
+/* FEATURE 06 — Botão Imprimir */
+.btn-print{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(17,203,7,0.35);
+  background:rgba(17,203,7,0.09);color:var(--green);
+  font-family:'Inter',sans-serif;transition:all .2s;
+  box-shadow:0 0 8px rgba(17,203,7,0.08);
+}
+.btn-print:hover{
+  background:rgba(17,203,7,0.18);border-color:rgba(17,203,7,0.6);
+  box-shadow:0 0 16px rgba(17,203,7,0.22);transform:translateY(-1px);
+}
+
+/* FEATURE 07 — Botão Entenda o XML */
+.btn-entenda{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--card2);color:var(--muted);
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-entenda:hover{border-color:var(--green-border);color:var(--text);}
+
+/* Painel de ações no doc viewer */
+.doc-actions{
+  display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;
+}
+
+/* ═══════════════════════════════════════════
+   FEATURE 07 — PAINEL "ENTENDA O XML"
+   Explicação visual tag a tag
+   ═══════════════════════════════════════════ */
+.xml-explain-panel{animation:fadeIn .3s ease;}
+.xml-explain-title{
+  font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;
+  margin-bottom:20px;display:flex;align-items:center;gap:8px;
+}
+.xml-tag-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:16px 20px;margin-bottom:10px;
+  transition:border-color .2s;
+}
+.xml-tag-card:hover{border-color:var(--green-border);}
+.xml-tag-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.xml-tag-name{
+  font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  font-weight:700;color:var(--green);
+  background:var(--green-dim);padding:3px 8px;
+  border-radius:5px;border:1px solid var(--green-border);
+}
+.xml-tag-value{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--yellow);
+  background:rgba(240,192,32,0.08);padding:3px 8px;
+  border-radius:5px;border:1px solid rgba(240,192,32,0.2);
+}
+.xml-tag-desc{font-size:.85rem;color:var(--muted);line-height:1.6;}
+
+/* No CT-e relacionado */
+.no-cte-msg{
+  text-align:center;padding:50px 20px;color:var(--muted);
+  font-size:.9rem;
+}
+
+/* ═══════════════════════════════════════════
+   FEATURE 06 — CSS DE IMPRESSÃO
+   Oculta elementos de navegação e imprime
+   apenas o documento aberto
+   ═══════════════════════════════════════════ */
+@media print {
+  #circuit-canvas,nav,.modal-topbar,.doc-actions,
+  .btn-print,.btn-entenda,.modal-nav-btn,
+  .drop-zone,.dash-metrics,.log-box,
+  #card-destinatarios,#btn-download-zip,
+  #btn-download-excel,.page-header,
+  .modal-topbar-info { display:none!important; }
+
+  body,.modal-overlay,.modal-container{
+    background:#fff!important;color:#000!important;
+  }
+  .modal-body{overflow:visible!important;max-height:none!important;}
+  .doc-section{border:1px solid #ccc!important;break-inside:avoid;}
+  .doc-chave{background:#f5f5f5!important;color:#333!important;}
+  .doc-section-title,.doc-tipo-badge,.doc-tag-name{color:#1a7a00!important;}
+
+}
 </style>
 </head>
 <body>
 
+<!-- FEATURE 08 — Canvas para fundo de circuitos neurais animados -->
 <canvas id="circuit-canvas"></canvas>
 
 <nav>
@@ -288,22 +489,33 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
   </a>
   <div class="nav-center">
     <button class="nav-tab active" onclick="showPage('sobre')" id="tab-sobre">
-      <span class="tab-icon">📘</span> Documentação
+      <!-- Ícone: file-text (Lucide SVG) -->
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Documentação
     </button>
     <button class="nav-tab" onclick="showPage('extractor')" id="tab-extractor">
-      <span class="tab-icon">⚡</span> Extrator XML
+      <!-- Ícone: database (Lucide SVG) -->
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      Extrator XML
     </button>
   </div>
   <div class="nav-end">
-    <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+    <button class="theme-btn" onclick="toggleTheme()" title="Alternar tema" id="theme-btn-icon">
+      <!-- Ícone: moon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
   </div>
 </nav>
 
 <main>
+  <!-- PÁGINA DOCUMENTAÇÃO -->
   <div class="page active" id="page-sobre">
     <div class="page-header">
-      <div class="page-tag">📘 Módulo Fiscal</div>
-      <h1 class="page-title">Validador & Processador</h1>
+      <div class="page-tag">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Módulo Fiscal
+      </div>
+      <h1 class="page-title">Validador &amp; Processador</h1>
       <p class="page-sub">Solução corporativa local para leitura estrutural, cruzamento relacional entre NF-e/CT-e e renomeação automatizada.</p>
     </div>
 
@@ -321,21 +533,28 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
       <div class="about-step">
         <div class="about-step-num">03</div>
         <div class="about-step-title">Renomeação Dinâmica</div>
-        <div class="about-step-desc">Tanto NF-es quanto CT-es são salvos usando a **Chave Oficial de 44 dígitos** como nome do arquivo dentro do pacote compactado final.</div>
+        <div class="about-step-desc">Tanto NF-es quanto CT-es são salvos usando a Chave Oficial de 44 dígitos como nome do arquivo dentro do pacote compactado final.</div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="icon">⚖️</span> Regras de Negócio Implementadas</div>
-      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Conversão de Unidades:</strong> Se a quantidade de itens estiver expressa em toneladas (<code>TON</code>/<code>TONELADA</code>/<code>T</code>/<code>TL</code>/<code>TO</code>), o motor multiplica automaticamente por 1.000 para converter o volume final e unitário para <code>KG</code>.</p>
-      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Ordenação Customizada:</strong> Conforme solicitado, a coluna de modalidade de frete da nota fiscal é gerada estrategicamente antes do bloco de observações complementares.</p>
+      <div class="card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Regras de Negócio Implementadas
+      </div>
+      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Conversão de Unidades:</strong> Se a quantidade de itens estiver expressa em toneladas (<code>TON</code>/<code>TONELADA</code>/<code>T</code>), o motor multiplica automaticamente por 1.000 para converter o volume final e unitário para <code>KG</code>.</p>
+      <p class="page-sub" style="font-size:0.88rem; margin-bottom:12px;">• <strong>Modalidade de Frete (Feature 01):</strong> A coluna <code>MOD_FRETE</code> é extraída diretamente do XML sem conversão ou interpretação, exibindo o valor bruto encontrado na tag <code>&lt;modFrete&gt;</code>.</p>
       <p class="page-sub" style="font-size:0.88rem;">• <strong>Filtro Case-Insensitive:</strong> Motor preparado para interpretar as tags <code>infCte</code>, <code>infCTe</code>, <code>infNFe</code> ou <code>infNFE</code> de forma transparente, garantindo compatibilidade total.</p>
     </div>
   </div>
 
+  <!-- PÁGINA EXTRATOR -->
   <div class="page" id="page-extractor">
     <div class="page-header">
-      <div class="page-tag">⚡ Engine Ativa</div>
+      <div class="page-tag">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Engine Ativa
+      </div>
       <h1 class="page-title">Processamento em Lote</h1>
       <p class="page-sub">Insira a pasta contendo as notas e conhecimentos de transporte abaixo para extração e agrupamento dos indicadores.</p>
     </div>
@@ -360,56 +579,74 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
     </div>
 
     <div class="drop-zone" id="drop-zone">
-      <span class="drop-zone-icon">📁</span>
+      <span class="drop-zone-icon">
+        <!-- Ícone: upload-cloud -->
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted)"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+      </span>
       <p class="drop-zone-text">Arraste sua pasta de documentos XML aqui</p>
       <p class="drop-zone-sub">ou clique para selecionar a pasta no seu computador</p>
       <input type="file" class="file-input-hidden" id="file-uploader" webkitdirectory directory multiple>
     </div>
 
     <div class="card" id="card-destinatarios" style="display:none;">
-      <div class="card-title"><span class="icon">🏢</span> Resumo por Destinatário</div>
+      <div class="card-title">
+        <!-- Ícone: building -->
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Resumo por Emitente
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Destinatário (Destino)</th>
-              <th>Quantidade de Notas Vinculadas</th>
+              <th>Emitente</th>
+              <th>Quantidade de Notas</th>
             </tr>
           </thead>
-          <tbody id="tbody-destinos">
-            </tbody>
+          <tbody id="tbody-destinos"></tbody>
         </table>
       </div>
     </div>
 
     <div class="card">
       <div class="flex-between">
-        <div class="card-title" style="margin-bottom:0;"><span class="icon">📊</span> Tabela Consolidada (Apenas NF-e)</div>
+        <div class="card-title" style="margin-bottom:0;">
+          <!-- Ícone: bar-chart -->
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          Tabela Consolidada (Apenas NF-e)
+        </div>
         <div class="btn-group">
           <button class="btn btn-secondary" id="btn-download-excel" style="display:none;" onclick="downloadExcelSheets()">
-            📊 Baixar Planilha Excel (.xlsx)
+            <!-- Ícone: sheet -->
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            Baixar Excel (.xlsx)
           </button>
           <button class="btn btn-primary" id="btn-download-zip" style="display:none;" onclick="downloadZipArchive()">
-            📦 Baixar XMLs Renomeados (.zip)
+            <!-- Ícone: archive -->
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+            Baixar XMLs Renomeados (.zip)
           </button>
         </div>
       </div>
-      
-      <div class="table-wrap">
+
+      <div class="table-wrap" style="margin-top:16px;">
         <table>
           <thead>
             <tr>
+              <!-- FEATURE 02 — Coluna Detalhar antes de Usina -->
+              <th>Detalhar</th>
               <th>Usina (Emitente)</th>
               <th>Número da Nota + Série</th>
               <th>Total Qtd Faturada</th>
               <th>Valor Faturado</th>
+              <!-- FEATURE 01 — Coluna MOD_FRETE -->
+              <th>Mod. Frete</th>
               <th>Chave da Nota Fiscal</th>
               <th>CT-e Relacionado</th>
             </tr>
           </thead>
           <tbody id="tbody-principal">
             <tr>
-              <td colspan="6" style="text-align:center; color:var(--muted); padding:30px;">
+              <td colspan="8" style="text-align:center;color:var(--muted);padding:30px;">
                 Nenhum arquivo processado até o momento. Insira documentos para popular a tabela.
               </td>
             </tr>
@@ -424,36 +661,64 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
   </div>
 </main>
 
+<!-- ═══════════════════════════════════════════
+     FEATURE 03 — MODAL DE VISUALIZAÇÃO
+     Overlay com blur + container animado
+     ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-container">
+
+    <!-- Barra superior de navegação do modal -->
+    <div class="modal-topbar">
+      <!-- FEATURE 03 — Menu: NF-e -->
+      <button class="modal-nav-btn active" id="modal-btn-nfe" onclick="modalShowTab('nfe')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        NF-e
+      </button>
+      <!-- FEATURE 03 — Menu: CT-e -->
+      <button class="modal-nav-btn" id="modal-btn-cte" onclick="modalShowTab('cte')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        CT-e
+      </button>
+      <div class="modal-topbar-sep"></div>
+      <!-- FEATURE 03 — Botão Voltar fecha o modal -->
+      <button class="modal-nav-btn btn-voltar" onclick="closeModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Voltar
+      </button>
+      <span class="modal-topbar-info" id="modal-topbar-info"></span>
+    </div>
+
+    <!-- Corpo do modal — conteúdo trocado via JS -->
+    <div class="modal-body" id="modal-body">
+      <!-- preenchido dinamicamente -->
+    </div>
+  </div>
+</div>
+
 <script>
 /* ═══════════════════════════════════════════════════════════
    GERENCIADOR DE ESTADO GLOBAL LOCAL
    ═══════════════════════════════════════════════════════════ */
-let nfeDatabase = {};
-let cteDatabase = [];
-let xmlFilesToZip = [];
-let rawNfeRowsForExcel = [];
-let rawCteRowsForExcel = [];
-let globalMetrics = {
-  totalValor: 0,
-  totalPeso: 0,
-  countNfe: 0,
-  countCte: 0,
-  destinos: {}
-};
+let nfeDatabase          = {};   // chave → objeto NF-e completo
+let cteDatabase          = [];   // array de objetos CT-e
+let cteDatabaseByChave   = {};   // chave CT-e → objeto completo (para modal)
+let xmlFilesToZip        = [];
+let rawNfeRowsForExcel   = [];
+let rawCteRowsForExcel   = [];
+let globalMetrics = { totalValor:0, totalPeso:0, countNfe:0, countCte:0, destinos:{} };
+
+// Estado do modal — armazena xmlDoc para reconstrução visual
+let modalCurrentNfe = null;
+let modalCurrentCte = null;
 
 /* ═══════════════════════════════════════════════════════════
    HELPER: Strip de namespace para compatibilidade total
-   O DOMParser preserva namespaces (xmlns="..."), o que faz
-   getElementsByTagName('infCte') não funcionar quando o
-   documento usa namespace padrão. A solução mais robusta é
-   remover os atributos xmlns do texto antes de parsear,
-   tornando todos os elementos acessíveis sem namespace.
    ═══════════════════════════════════════════════════════════ */
 function stripNamespaces(xmlText) {
-  // Remove xmlns declarations e prefixos de namespace das tags
   return xmlText
-    .replace(/xmlns(?::\w+)?="[^"]*"/g, '')   // remove xmlns="..." e xmlns:xxx="..."
-    .replace(/<(\/?)\w+:/g, '<$1');             // remove prefixos tipo <cte: → <
+    .replace(/xmlns(?::\w+)?="[^"]*"/g, '')
+    .replace(/<(\/?)\w+:/g, '<$1');
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -468,120 +733,91 @@ function showPage(pageId) {
 
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
-  const target = current === 'light' ? 'dark' : 'light';
+  const target  = current === 'light' ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', target);
-  document.querySelector('.theme-btn').innerText = target === 'light' ? '☀️' : '🌙';
+  const btn = document.getElementById('theme-btn-icon');
+  btn.innerHTML = target === 'light'
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
 }
 
 /* ═══════════════════════════════════════════════════════════
    DRAG & DROP EVENTS
    ═══════════════════════════════════════════════════════════ */
-const dropZone = document.getElementById('drop-zone');
+const dropZone    = document.getElementById('drop-zone');
 const fileUploader = document.getElementById('file-uploader');
-
-dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
-dropZone.addEventListener('drop', (e) => {
-  e.preventDefault();
-  dropZone.classList.remove('dragover');
-  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
-    handleFilesInput(e.dataTransfer.files);
-  }
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  if (e.dataTransfer?.files?.length) handleFilesInput(e.dataTransfer.files);
 });
-fileUploader.addEventListener('change', (e) => {
-  if (e.target.files && e.target.files.length) {
-    handleFilesInput(e.target.files);
-  }
+fileUploader.addEventListener('change', e => {
+  if (e.target.files?.length) handleFilesInput(e.target.files);
 });
 
 /* ═══════════════════════════════════════════════════════════
    PROCESSADOR LOTE PRINCIPAL
    ═══════════════════════════════════════════════════════════ */
 async function handleFilesInput(fileList) {
-  const logger = document.getElementById('log-console');
-  logger.innerHTML = '';
-
-  // Reset de estado
-  nfeDatabase = {};
-  cteDatabase = [];
-  xmlFilesToZip = [];
+  document.getElementById('log-console').innerHTML = '';
+  nfeDatabase        = {};
+  cteDatabase        = [];
+  cteDatabaseByChave = {};
+  xmlFilesToZip      = [];
   rawNfeRowsForExcel = [];
   rawCteRowsForExcel = [];
-  globalMetrics = { totalValor: 0, totalPeso: 0, countNfe: 0, countCte: 0, destinos: {} };
+  globalMetrics      = { totalValor:0, totalPeso:0, countNfe:0, countCte:0, destinos:{} };
 
-  // Esconde botões e cards até processar
-  document.getElementById('btn-download-zip').style.display = 'none';
+  document.getElementById('btn-download-zip').style.display   = 'none';
   document.getElementById('btn-download-excel').style.display = 'none';
   document.getElementById('card-destinatarios').style.display = 'none';
 
   addLog('Iniciando varredura por lote dos documentos selecionados...', 'info');
-
   const arquivosXml = Array.from(fileList).filter(f => f.name.toLowerCase().endsWith('.xml'));
 
-  if (arquivosXml.length === 0) {
-    addLog('Nenhum arquivo válido com extensão .xml foi detectado na seleção.', 'err');
-    return;
+  if (!arquivosXml.length) {
+    addLog('Nenhum arquivo válido com extensão .xml foi detectado na seleção.', 'err'); return;
   }
-
   addLog(`${arquivosXml.length} arquivo(s) XML encontrado(s). Processando...`, 'info');
 
   for (const file of arquivosXml) {
     try {
-      const textContent = await readFileAsText(file);
-      parseXmlDocument(textContent, file.name);
+      const text = await readFileAsText(file);
+      parseXmlDocument(text, file.name);
     } catch (err) {
       addLog(`Falha crítica na leitura de ${file.name}: ${err.message}`, 'err');
     }
   }
-
   crossReferenceDocuments();
   compileAndRenderInterface();
 }
 
 function readFileAsText(file) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = (e) => reject(e);
-    reader.readAsText(file, 'UTF-8');
+    const r = new FileReader();
+    r.onload  = e => resolve(e.target.result);
+    r.onerror = e => reject(e);
+    r.readAsText(file, 'UTF-8');
   });
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MOTOR DE DETECÇÃO (COM STRIP DE NAMESPACE)
-   ─────────────────────────────────────────────────────────
-   PROBLEMA ORIGINAL: DOMParser mantém o namespace do documento.
-   Quando o XML tem xmlns="http://www.portalfiscal.inf.br/cte",
-   getElementsByTagName('infCte') retorna HTMLCollection vazia
-   porque o browser trata as tags como pertencentes ao namespace
-   do portal fiscal, não ao namespace vazio.
-   
-   SOLUÇÃO: stripNamespaces() remove todos os xmlns antes do
-   parse, deixando as tags sem namespace e totalmente acessíveis.
+   MOTOR DE DETECÇÃO
    ═══════════════════════════════════════════════════════════ */
 function parseXmlDocument(xmlText, fallbackName) {
-  // Aplica strip de namespace antes de parsear
   const cleanXml = stripNamespaces(xmlText);
+  const parser   = new DOMParser();
+  const xmlDoc   = parser.parseFromString(cleanXml, 'text/xml');
 
-  const parser = new DOMParser();
-  const xmlDoc = parser.parseFromString(cleanXml, 'text/xml');
-
-  // Verifica erro de parse
-  const parseError = xmlDoc.querySelector('parsererror');
-  if (parseError) {
-    addLog(`Erro de sintaxe XML em: ${fallbackName}`, 'err');
-    return;
+  if (xmlDoc.querySelector('parsererror')) {
+    addLog(`Erro de sintaxe XML em: ${fallbackName}`, 'err'); return;
   }
 
-  // Detecção robusta: verifica tags raiz e tags infCte / infNFe
-  // Após strip, todas as tags são acessíveis sem namespace
   const infNFeNode = xmlDoc.querySelector('infNFe, infNfe, infNFE');
   const infCteNode = xmlDoc.querySelector('infCte, infCTe, infCTE');
-
-  // Também verifica pela tag raiz do documento para desambiguar
-  const rootTag = xmlDoc.documentElement ? xmlDoc.documentElement.tagName.toLowerCase() : '';
+  const rootTag    = xmlDoc.documentElement?.tagName?.toLowerCase() || '';
   const isCteByRoot = rootTag.includes('cteproc') || rootTag.includes('cte');
-  const isNfeByRoot = rootTag.includes('nfeproc') || rootTag.includes('nfe');
 
   if (infCteNode && (isCteByRoot || !infNFeNode)) {
     processCteNode(xmlDoc, xmlText, infCteNode);
@@ -596,23 +832,14 @@ function parseXmlDocument(xmlText, fallbackName) {
    PARSER NF-e
    ═══════════════════════════════════════════════════════════ */
 function processNfeNode(xmlDoc, rawText, infNFeNode) {
-  // Helper: pega o primeiro texto de uma tag no documento inteiro
-  const g = (tag) => {
-    const els = xmlDoc.getElementsByTagName(tag);
-    return els.length ? els[0].textContent.trim() : '';
-  };
+  const g = tag => { const els = xmlDoc.getElementsByTagName(tag); return els.length ? els[0].textContent.trim() : ''; };
 
-  // Extrai chave do atributo Id (ex: "NFe35260508110543...")
   let chave = infNFeNode.getAttribute('Id') || '';
   chave = chave.replace(/\D/g, '').trim();
+  if (!chave) { addLog('NF-e ignorada: atributo Id não encontrado no nó infNFe.', 'warn'); return; }
 
-  if (!chave) {
-    addLog('NF-e ignorada: atributo Id não encontrado no nó infNFe.', 'warn');
-    return;
-  }
-
-  const nNF    = g('nNF')  || '—';
-  const serie  = g('serie') || '—';
+  const nNF   = g('nNF')   || '—';
+  const serie = g('serie') || '—';
 
   const emit = xmlDoc.getElementsByTagName('emit')[0];
   const usina    = emit ? (emit.getElementsByTagName('xNome')[0]?.textContent?.trim() || emit.getElementsByTagName('xFant')[0]?.textContent?.trim() || 'Desconhecido') : 'Desconhecido';
@@ -623,9 +850,8 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
   const destCNPJ    = dest ? (dest.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || dest.getElementsByTagName('CPF')[0]?.textContent?.trim() || '') : '';
 
   const dhEmi         = g('dhEmi') || g('dEmi') || '';
-  const dataFormatada = dhEmi.substring(0, 10);
+  const dataFormatada = fmtDate(dhEmi);
 
-  // Valor total da NF — busca dentro de ICMSTot para maior precisão
   const icmsTot = xmlDoc.getElementsByTagName('ICMSTot')[0];
   const vNF = icmsTot ? parseFloat(icmsTot.getElementsByTagName('vNF')[0]?.textContent || '0') : parseFloat(g('vNF') || '0');
 
@@ -638,10 +864,13 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
   const entMun  = entrega ? (entrega.getElementsByTagName('xMun')[0]?.textContent?.trim() || '') : '';
   const entUF   = entrega ? (entrega.getElementsByTagName('UF')[0]?.textContent?.trim()  || '') : '';
 
-  // Modalidade de frete
-  const modFreteCod = g('modFrete');
-  const modFreteMap = { '0': '0 - CIF (Emitente)', '1': '1 - FOB (Destinatário)', '2': '2 - Terceiros', '3': '3 - Próprio (Remetente)', '4': '4 - Próprio (Destinatário)', '9': '9 - Sem Frete' };
-  const modFreteDesc = modFreteMap[modFreteCod] || 'Não Informado';
+  /* FEATURE 01 — Extração do modFrete SEM tradução/conversão
+     O valor bruto do XML é preservado integralmente */
+  const modFrete = g('modFrete') || '';
+
+  // Peso bruto total (transporte)
+  const qVolTotal = g('qVol') || '';
+  const pesoB     = g('pesoB') || '';
 
   // Itens (det)
   let pesoAcumulado = 0;
@@ -651,7 +880,6 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
     const detNode = detList[i];
     const nItem   = detNode.getAttribute('nItem') || String(i + 1);
     const prod    = detNode.getElementsByTagName('prod')[0];
-
     if (!prod) continue;
 
     const cProd = prod.getElementsByTagName('cProd')[0]?.textContent?.trim() || '';
@@ -665,84 +893,102 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
     const vProd = parseFloat(prod.getElementsByTagName('vProd')[0]?.textContent || '0');
 
     // Conversão TON → KG
-    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO' || uCom === 'TL') {
-      qCom   = qCom * 1000;
-      vUnCom = vUnCom / 1000;
-      uCom   = 'KG';
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T') {
+      qCom = qCom * 1000; vUnCom = vUnCom / 1000; uCom = 'KG';
     }
-
     pesoAcumulado += qCom;
 
     rawNfeRowsForExcel.push({
-      'CHAVE_ACESSO (ID)':        chave,
-      'NUMERO_DOC':               parseInt(nNF)   || 0,
-      'SERIE':                    parseInt(serie) || 0,
-      'DATA_EMISSAO':             dataFormatada,
-      'NOME_EMITENTE':            usina,
-      'CNPJ_EMITENTE':            fmtCNPJ(emitCNPJ),
-      'NOME_DESTINATARIO':        destinoNome,
-      'CNPJ_DESTINATARIO':        fmtCNPJ(destCNPJ),
-      'VALOR_TOTAL_NF':           vNF,
-      'ENTREGA_CNPJ':             fmtCNPJ(entCNPJ),
-      'ENTREGA_RAZAO_SOCIAL':     entNome,
-      'ENTREGA_MUNICIPIO':        entMun,
-      'ENTREGA_UF':               entUF,
-      'NUM_ITEM':                 parseInt(nItem) || 0,
-      'COD_PRODUTO':              cProd,
-      'DESCRICAO_PRODUTO':        xProd,
-      'NCM':                      ncm,
-      'CFOP':                     cfop,
-      'UNIDADE_MEDIDA':           uCom,
-      'QTD_COMERCIAL (KG)':       qCom,
-      'VALOR_UNITARIO (KG)':      vUnCom,
-      'VALOR_TOTAL_ITEM':         vProd,
+      'CHAVE_ACESSO (ID)':          chave,
+      'NUMERO_DOC':                 parseInt(nNF)   || 0,
+      'SERIE':                      parseInt(serie) || 0,
+      'DATA_EMISSAO':               dataFormatada,
+      'NOME_EMITENTE':              usina,
+      'CNPJ_EMITENTE':              fmtCNPJ(emitCNPJ),
+      'NOME_DESTINATARIO':          destinoNome,
+      'CNPJ_DESTINATARIO':          fmtCNPJ(destCNPJ),
+      'VALOR_TOTAL_NF':             vNF,
+      'ENTREGA_CNPJ':               fmtCNPJ(entCNPJ),
+      'ENTREGA_RAZAO_SOCIAL':       entNome,
+      'ENTREGA_MUNICIPIO':          entMun,
+      'ENTREGA_UF':                 entUF,
+      'NUM_ITEM':                   parseInt(nItem) || 0,
+      'COD_PRODUTO':                cProd,
+      'DESCRICAO_PRODUTO':          xProd,
+      'NCM':                        ncm,
+      'CFOP':                       cfop,
+      'UNIDADE_MEDIDA':             uCom,
+      'QTD_COMERCIAL (KG)':         qCom,
+      'VALOR_UNITARIO (KG)':        vUnCom,
+      'VALOR_TOTAL_ITEM':           vProd,
+      /* FEATURE 01 — Coluna MOD_FRETE adicionada ao Excel */
+      'MOD_FRETE':                  modFrete,
       'OBSERVACOES_COMPLEMENTARES': infCpl
     });
   }
 
   nfeDatabase[chave] = {
-    usina:       usina,
-    notaSerie:   `${nNF} / Série: ${serie}`,
-    quantidade:  pesoAcumulado,
-    valor:       vNF,
-    chave:       chave,
-    destinatario: destinoNome,
-    cteVinculado: '—'
+    usina, notaSerie: `${nNF} / Série: ${serie}`,
+    quantidade: pesoAcumulado, valor: vNF,
+    chave, destinatario: destinoNome, cteVinculado: '—',
+    /* FEATURE 01 — armazena modFrete no objeto da NF-e */
+    modFrete,
+    /* Armazena xmlDoc para reconstrução visual no modal */
+    xmlDoc, rawText,
+    // Dados extras para modal
+    _nNF: nNF, _serie: serie, _data: dataFormatada,
+    _emitNome: usina, _emitCNPJ: emitCNPJ,
+    _destNome: destinoNome, _destCNPJ: destCNPJ,
+    _vNF: vNF, _infCpl: infCpl, _pesoB: pesoB,
+    _entNome: entNome, _entCNPJ: entCNPJ, _entMun: entMun, _entUF: entUF,
+    _detList: buildDetList(xmlDoc),
   };
 
   xmlFilesToZip.push({ filename: `${chave}.xml`, content: rawText });
-
   globalMetrics.countNfe++;
   globalMetrics.totalValor += vNF;
   globalMetrics.totalPeso  += pesoAcumulado;
-  globalMetrics.destinos[destinoNome] = (globalMetrics.destinos[destinoNome] || 0) + 1;
-
+  globalMetrics.destinos[usina] = (globalMetrics.destinos[usina] || 0) + 1;
   addLog(`NF-e identificada  ✓  Chave: ...${chave.slice(-14)}  |  ${usina}`, 'ok');
+}
+
+/* Helper — constrói lista de produtos a partir do xmlDoc */
+function buildDetList(xmlDoc) {
+  const items = [];
+  const dets  = xmlDoc.getElementsByTagName('det');
+  for (let i = 0; i < dets.length; i++) {
+    const prod = dets[i].getElementsByTagName('prod')[0];
+    if (!prod) continue;
+    let uCom   = (prod.getElementsByTagName('uCom')[0]?.textContent || '').toUpperCase().trim();
+    let qCom   = parseFloat(prod.getElementsByTagName('qCom')[0]?.textContent || '0');
+    let vUnCom = parseFloat(prod.getElementsByTagName('vUnCom')[0]?.textContent || '0');
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T') { qCom*=1000; vUnCom/=1000; uCom='KG'; }
+    items.push({
+      cProd:  prod.getElementsByTagName('cProd')[0]?.textContent?.trim() || '',
+      xProd:  prod.getElementsByTagName('xProd')[0]?.textContent?.trim() || '',
+      ncm:    prod.getElementsByTagName('NCM')[0]?.textContent?.trim()   || '',
+      cfop:   prod.getElementsByTagName('CFOP')[0]?.textContent?.trim()  || '',
+      qCom, uCom, vUnCom,
+      vProd:  parseFloat(prod.getElementsByTagName('vProd')[0]?.textContent || '0')
+    });
+  }
+  return items;
 }
 
 /* ═══════════════════════════════════════════════════════════
    PARSER CT-e
    ═══════════════════════════════════════════════════════════ */
 function processCteNode(xmlDoc, rawText, infCteNode) {
-  const g = (tag) => {
-    const els = xmlDoc.getElementsByTagName(tag);
-    return els.length ? els[0].textContent.trim() : '';
-  };
+  const g = tag => { const els = xmlDoc.getElementsByTagName(tag); return els.length ? els[0].textContent.trim() : ''; };
 
-  // Extrai chave do atributo Id (ex: "CTe35260524858015...")
   let chaveCte = infCteNode.getAttribute('Id') || '';
   chaveCte = chaveCte.replace(/\D/g, '').trim();
-
-  if (!chaveCte) {
-    addLog('CT-e ignorado: atributo Id não encontrado no nó infCte.', 'warn');
-    return;
-  }
+  if (!chaveCte) { addLog('CT-e ignorado: atributo Id não encontrado no nó infCte.', 'warn'); return; }
 
   const nCT   = g('nCT')   || '—';
   const serie = g('serie') || '—';
-
   const dhEmi         = g('dhEmi') || '';
-  const dataFormatada = dhEmi.substring(0, 10);
+  const dataFormatada = fmtDate(dhEmi);
 
   const emit = xmlDoc.getElementsByTagName('emit')[0];
   const emitNome = emit ? (emit.getElementsByTagName('xNome')[0]?.textContent?.trim() || '') : '';
@@ -754,31 +1000,31 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
 
   const rem = xmlDoc.getElementsByTagName('rem')[0];
   const remeteNome = rem ? (rem.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Não Informado') : 'Não Informado';
+  const remeteCNPJ = rem ? (rem.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
 
-  // Valor total do frete
+  // Recebedor
+  const rec = xmlDoc.getElementsByTagName('receb')[0];
+  const recNome = rec ? (rec.getElementsByTagName('xNome')[0]?.textContent?.trim() || '') : '';
+
   const vTPrest = parseFloat(g('vTPrest') || '0');
 
-  // Observações — busca em xObs dentro de compl
   const complNode = xmlDoc.getElementsByTagName('compl')[0];
   const xObs = complNode ? (complNode.getElementsByTagName('xObs')[0]?.textContent?.trim() || '') : g('xObs');
 
-  // Tomador do frete (toma3 = tomador padrão, toma4 = terceiro nomeado)
   const toma3 = xmlDoc.getElementsByTagName('toma3')[0];
   const toma4 = xmlDoc.getElementsByTagName('toma4')[0];
   let tomaFreteDesc = 'Outros';
-
   if (toma3) {
     const tCod = toma3.getElementsByTagName('toma')[0]?.textContent?.trim() || '';
-    const tomaMap = { '0': '0 - Remetente', '1': '1 - Expedidor', '2': '2 - Recebedor', '3': '3 - Destinatário' };
+    const tomaMap = { '0':'0 - Remetente','1':'1 - Expedidor','2':'2 - Recebedor','3':'3 - Destinatário' };
     tomaFreteDesc = tomaMap[tCod] || 'Outros';
   } else if (toma4) {
-    const tCod = toma4.getElementsByTagName('toma')[0]?.textContent?.trim() || '';
-    // toma4: código 4 = Outros (tomador identificado pelo CNPJ/CPF)
+    const tCod  = toma4.getElementsByTagName('toma')[0]?.textContent?.trim() || '';
     const tNome = toma4.getElementsByTagName('xNome')[0]?.textContent?.trim() || 'Terceiro';
     tomaFreteDesc = tCod === '4' ? `4 - Outros (${tNome})` : tNome;
   }
 
-  // Chaves de NF-e referenciadas dentro de infDoc/infNFe/chave
+  // Chaves de NF-e referenciadas
   const chavesReferenciadas = [];
   const infDocNode = xmlDoc.getElementsByTagName('infDoc')[0];
   if (infDocNode) {
@@ -788,20 +1034,15 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
       if (chRef) chavesReferenciadas.push(chRef);
     }
   }
-
-  // Fallback: busca global por <chave> se infDoc não encontrou nada
-  if (chavesReferenciadas.length === 0) {
+  if (!chavesReferenciadas.length) {
     const allChaves = xmlDoc.getElementsByTagName('chave');
     for (let i = 0; i < allChaves.length; i++) {
       const c = allChaves[i].textContent.trim();
-      // Chave de NF-e tem 44 dígitos numéricos e não é a própria chave do CT-e
-      if (/^\d{44}$/.test(c) && c !== chaveCte) {
-        chavesReferenciadas.push(c);
-      }
+      if (/^\d{44}$/.test(c) && c !== chaveCte) chavesReferenciadas.push(c);
     }
   }
 
-  const chavesStr = chavesReferenciadas.length > 0 ? chavesReferenciadas.join(' | ') : 'Nenhuma detectada';
+  const chavesStr = chavesReferenciadas.length ? chavesReferenciadas.join(' | ') : 'Nenhuma detectada';
 
   rawCteRowsForExcel.push({
     'CHAVE_ACESSO (ID)':    chaveCte,
@@ -819,13 +1060,16 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
     'OBSERVACOES':          xObs
   });
 
-  cteDatabase.push({
-    chaveCte:    chaveCte,
-    nfeAlvoList: chavesReferenciadas
-  });
+  cteDatabaseByChave[chaveCte] = {
+    chaveCte, nCT, serie, dataFormatada,
+    emitNome, emitCNPJ, destNome, destCNPJ,
+    remeteNome, remeteCNPJ, recNome,
+    vTPrest, tomaFreteDesc, xObs,
+    chavesReferenciadas, xmlDoc, rawText
+  };
 
+  cteDatabase.push({ chaveCte, nfeAlvoList: chavesReferenciadas });
   xmlFilesToZip.push({ filename: `${chaveCte}.xml`, content: rawText });
-
   globalMetrics.countCte++;
   addLog(`CT-e identificado  ✓  Chave: ...${chaveCte.slice(-14)}  |  ${chavesReferenciadas.length} NF(s) vinculada(s)`, 'ok');
 }
@@ -834,14 +1078,11 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
    CRUZAMENTO RELACIONAL CT-e ↔ NF-e
    ═══════════════════════════════════════════════════════════ */
 function crossReferenceDocuments() {
-  if (cteDatabase.length === 0) return;
+  if (!cteDatabase.length) return;
   addLog(`Cruzando ${cteDatabase.length} CT-e(s) com as NF-es carregadas...`, 'info');
-
   cteDatabase.forEach(cte => {
     cte.nfeAlvoList.forEach(nfeChave => {
-      if (nfeDatabase[nfeChave]) {
-        nfeDatabase[nfeChave].cteVinculado = cte.chaveCte;
-      }
+      if (nfeDatabase[nfeChave]) nfeDatabase[nfeChave].cteVinculado = cte.chaveCte;
     });
   });
 }
@@ -850,18 +1091,16 @@ function crossReferenceDocuments() {
    RENDERIZAÇÃO DA INTERFACE
    ═══════════════════════════════════════════════════════════ */
 function compileAndRenderInterface() {
-  // Métricas
-  document.getElementById('m-total-val').innerText  = globalMetrics.totalValor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  document.getElementById('m-total-peso').innerText = globalMetrics.totalPeso.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' KG';
+  document.getElementById('m-total-val').innerText  = globalMetrics.totalValor.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  document.getElementById('m-total-peso').innerText = globalMetrics.totalPeso.toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 }) + ' KG';
   document.getElementById('m-count-nfe').innerText  = globalMetrics.countNfe;
   document.getElementById('m-count-cte').innerText  = globalMetrics.countCte;
 
   // Tabela de destinatários
-  const tbodyDestinos      = document.getElementById('tbody-destinos');
-  const cardDestinatarios  = document.getElementById('card-destinatarios');
-  tbodyDestinos.innerHTML  = '';
-  const listaDestinos      = Object.keys(globalMetrics.destinos);
-
+  const tbodyDestinos     = document.getElementById('tbody-destinos');
+  const cardDestinatarios = document.getElementById('card-destinatarios');
+  tbodyDestinos.innerHTML = '';
+  const listaDestinos     = Object.keys(globalMetrics.destinos);
   if (listaDestinos.length > 0) {
     cardDestinatarios.style.display = 'block';
     listaDestinos.forEach(dest => {
@@ -872,37 +1111,48 @@ function compileAndRenderInterface() {
   }
 
   // Tabela principal NF-e
-  const tbodyPrincipal    = document.getElementById('tbody-principal');
+  const tbodyPrincipal     = document.getElementById('tbody-principal');
   tbodyPrincipal.innerHTML = '';
   const chavesNfe          = Object.keys(nfeDatabase);
 
-  if (chavesNfe.length === 0) {
-    tbodyPrincipal.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:30px;">Nenhuma NF-e processada. Insira arquivos para popular os dados.</td></tr>`;
+  if (!chavesNfe.length) {
+    tbodyPrincipal.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:30px;">Nenhuma NF-e processada. Insira arquivos para popular os dados.</td></tr>`;
   } else {
     chavesNfe.forEach(chave => {
       const item = nfeDatabase[chave];
       const tr   = document.createElement('tr');
       const cteLabel = item.cteVinculado !== '—'
-        ? `<span style="color:var(--yellow);font-weight:600;">${item.cteVinculado}</span>`
+        ? `<span style="color:var(--yellow);font-weight:600;font-size:.72rem;">${item.cteVinculado}</span>`
+        : `<span style="color:var(--muted2)">—</span>`;
+
+      /* FEATURE 01 — exibe modFrete bruto na coluna MOD_FRETE */
+      const modFreteLabel = item.modFrete !== undefined && item.modFrete !== ''
+        ? `<span class="mono" style="color:var(--muted);">${item.modFrete}</span>`
         : `<span style="color:var(--muted2)">—</span>`;
 
       tr.innerHTML = `
+        <!-- FEATURE 02 — Botão Detalhar antes da coluna Usina -->
+        <td>
+          <button class="btn-detalhar" onclick="openModal('${chave}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Detalhar
+          </button>
+        </td>
         <td>${item.usina}</td>
         <td class="mono">${item.notaSerie}</td>
-        <td class="mono">${item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} KG</td>
-        <td class="mono" style="color:var(--green);font-weight:500;">${item.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
-        <td class="mono" style="font-size:0.75rem;color:var(--muted);" title="${item.chave}">${item.chave}</td>
-        <td class="mono" style="font-size:0.75rem;">${cteLabel}</td>
+        <td class="mono">${item.quantidade.toLocaleString('pt-BR', { minimumFractionDigits:2 })} KG</td>
+        <td class="mono" style="color:var(--green);font-weight:500;">${item.valor.toLocaleString('pt-BR', { style:'currency', currency:'BRL' })}</td>
+        <td>${modFreteLabel}</td>
+        <td class="mono" style="font-size:.7rem;color:var(--muted);" title="${item.chave}">${item.chave}</td>
+        <td class="mono" style="font-size:.72rem;">${cteLabel}</td>
       `;
       tbodyPrincipal.appendChild(tr);
     });
   }
 
-  // Botões de download
   const temDados = xmlFilesToZip.length > 0;
   document.getElementById('btn-download-zip').style.display   = temDados ? 'inline-flex' : 'none';
   document.getElementById('btn-download-excel').style.display = temDados ? 'inline-flex' : 'none';
-
   addLog(`Processamento concluído: ${globalMetrics.countNfe} NF-e(s) | ${globalMetrics.countCte} CT-e(s) — Downloads disponíveis.`, 'info');
 }
 
@@ -910,44 +1160,37 @@ function compileAndRenderInterface() {
    EXPORTADOR EXCEL — DUAS ABAS (NF-e e CT-e)
    ═══════════════════════════════════════════════════════════ */
 function downloadExcelSheets() {
-  if (rawNfeRowsForExcel.length === 0 && rawCteRowsForExcel.length === 0) {
-    addLog('Nenhum registro encontrado para exportar.', 'warn');
-    return;
+  if (!rawNfeRowsForExcel.length && !rawCteRowsForExcel.length) {
+    addLog('Nenhum registro encontrado para exportar.', 'warn'); return;
   }
-
   addLog('Gerando planilha Excel com abas NF-e e CT-e...', 'info');
   const wb = XLSX.utils.book_new();
 
+  /* FEATURE 01 — Coluna MOD_FRETE adicionada ao cabeçalho Excel */
   const headerNfe = [
     'CHAVE_ACESSO (ID)', 'NUMERO_DOC', 'SERIE', 'DATA_EMISSAO', 'NOME_EMITENTE',
     'CNPJ_EMITENTE', 'NOME_DESTINATARIO', 'CNPJ_DESTINATARIO', 'VALOR_TOTAL_NF',
     'ENTREGA_CNPJ', 'ENTREGA_RAZAO_SOCIAL', 'ENTREGA_MUNICIPIO', 'ENTREGA_UF',
     'NUM_ITEM', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'NCM', 'CFOP', 'UNIDADE_MEDIDA',
-    'QTD_COMERCIAL (KG)', 'VALOR_UNITARIO (KG)', 'VALOR_TOTAL_ITEM', 'OBSERVACOES_COMPLEMENTARES'
+    'QTD_COMERCIAL (KG)', 'VALOR_UNITARIO (KG)', 'VALOR_TOTAL_ITEM',
+    'MOD_FRETE',
+    'OBSERVACOES_COMPLEMENTARES'
   ];
-
   const headerCte = [
     'CHAVE_ACESSO (ID)', 'CHAVE_NFE_REFERENCIADA', 'NUMERO_DOC', 'SERIE', 'DATA_EMISSAO',
     'NOME_EMITENTE', 'CNPJ_EMITENTE', 'NOME_DESTINATARIO', 'CNPJ_DESTINATARIO',
     'VALOR_TOTAL_FRETE', 'TOMADOR_FRETE', 'REMETENTE', 'OBSERVACOES'
   ];
 
-  if (rawNfeRowsForExcel.length > 0) {
-    const wsNfe = XLSX.utils.json_to_sheet(rawNfeRowsForExcel, { header: headerNfe });
-    XLSX.utils.book_append_sheet(wb, wsNfe, 'NF-e');
-  } else {
-    // Aba vazia com cabeçalho
-    const wsNfe = XLSX.utils.aoa_to_sheet([headerNfe]);
-    XLSX.utils.book_append_sheet(wb, wsNfe, 'NF-e');
-  }
+  const wsNfe = rawNfeRowsForExcel.length
+    ? XLSX.utils.json_to_sheet(rawNfeRowsForExcel, { header: headerNfe })
+    : XLSX.utils.aoa_to_sheet([headerNfe]);
+  XLSX.utils.book_append_sheet(wb, wsNfe, 'NF-e');
 
-  if (rawCteRowsForExcel.length > 0) {
-    const wsCte = XLSX.utils.json_to_sheet(rawCteRowsForExcel, { header: headerCte });
-    XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
-  } else {
-    const wsCte = XLSX.utils.aoa_to_sheet([headerCte]);
-    XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
-  }
+  const wsCte = rawCteRowsForExcel.length
+    ? XLSX.utils.json_to_sheet(rawCteRowsForExcel, { header: headerCte })
+    : XLSX.utils.aoa_to_sheet([headerCte]);
+  XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
 
   const hoje = new Date().toISOString().substring(0, 10);
   XLSX.writeFile(wb, `CamelDev_Relatorio_${hoje}.xlsx`);
@@ -958,37 +1201,29 @@ function downloadExcelSheets() {
    EXPORTADOR ZIP — XMLs RENOMEADOS PELA CHAVE OFICIAL
    ═══════════════════════════════════════════════════════════ */
 function downloadZipArchive() {
-  if (xmlFilesToZip.length === 0) return;
-
+  if (!xmlFilesToZip.length) return;
   addLog('Comprimindo XMLs renomeados pelas chaves oficiais...', 'info');
   const zip = new JSZip();
-
-  xmlFilesToZip.forEach(file => { zip.file(file.filename, file.content); });
-
+  xmlFilesToZip.forEach(f => zip.file(f.filename, f.content));
   zip.generateAsync({ type: 'blob' }).then(content => {
     const link = document.createElement('a');
     link.href = URL.createObjectURL(content);
     link.download = `XMLs_Renomeados_CamelDev_${new Date().toISOString().substring(0, 10)}.zip`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
     addLog('ZIP baixado com sucesso!', 'ok');
-  }).catch(err => {
-    addLog(`Erro ao criar ZIP: ${err.message}`, 'err');
-  });
+  }).catch(err => addLog(`Erro ao criar ZIP: ${err.message}`, 'err'));
 }
 
 /* ═══════════════════════════════════════════════════════════
    UTILITÁRIOS
    ═══════════════════════════════════════════════════════════ */
 function addLog(text, type) {
-  const consoleLog = document.getElementById('log-console');
-  const span       = document.createElement('span');
-  span.className   = `log-line log-${type}`;
-  span.innerText   = `[${new Date().toLocaleTimeString()}] ${text}`;
-  consoleLog.appendChild(span);
-  consoleLog.appendChild(document.createElement('br'));
-  consoleLog.scrollTop = consoleLog.scrollHeight;
+  const log  = document.getElementById('log-console');
+  const span = document.createElement('span');
+  span.className = `log-line log-${type}`;
+  span.innerText = `[${new Date().toLocaleTimeString()}] ${text}`;
+  log.appendChild(span); log.appendChild(document.createElement('br'));
+  log.scrollTop = log.scrollHeight;
 }
 
 function fmtCNPJ(v) {
@@ -999,32 +1234,622 @@ function fmtCNPJ(v) {
   return n;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CANVAS BACKGROUND ANIMATION
-   ═══════════════════════════════════════════════════════════ */
-const canvas = document.getElementById('circuit-canvas');
-if (canvas) {
-  const ctx = canvas.getContext('2d');
-  let width  = canvas.width  = window.innerWidth;
-  let height = canvas.height = window.innerHeight;
+/* Converte "AAAA-MM-DD" → "DD/MM/AAAA" para exibição no Excel e no modal */
+function fmtDate(iso) {
+  if (!iso) return '';
+  const parts = iso.substring(0, 10).split('-');
+  if (parts.length !== 3) return iso;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
 
-  window.addEventListener('resize', () => {
-    width  = canvas.width  = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+function fmtCurrency(v) {
+  return v.toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURE 03 — CONTROLE DO MODAL
+   ═══════════════════════════════════════════════════════════ */
+let _currentChave = null;
+
+function openModal(chaveNfe) {
+  _currentChave = chaveNfe;
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Define info da chave no topbar
+  document.getElementById('modal-topbar-info').textContent = `NF-e ...${chaveNfe.slice(-14)}`;
+
+  // Prepara estado do CT-e vinculado
+  const nfe = nfeDatabase[chaveNfe];
+  modalCurrentNfe = nfe || null;
+  modalCurrentCte = nfe?.cteVinculado && nfe.cteVinculado !== '—'
+    ? cteDatabaseByChave[nfe.cteVinculado] || null
+    : null;
+
+  // Ativa aba NF-e por padrão
+  modalShowTab('nfe');
+}
+
+function closeModal() {
+  const overlay = document.getElementById('modal-overlay');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  _currentChave = null;
+}
+
+// Fecha clicando fora do container
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function modalShowTab(tab) {
+  document.getElementById('modal-btn-nfe').classList.toggle('active', tab === 'nfe');
+  document.getElementById('modal-btn-cte').classList.toggle('active', tab === 'cte');
+
+  const body = document.getElementById('modal-body');
+  if (tab === 'nfe') {
+    body.innerHTML = buildNfeHtml(modalCurrentNfe);
+  } else {
+    body.innerHTML = buildCteHtml(modalCurrentCte);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURE 04 — RECONSTRUÇÃO VISUAL DA NF-e
+   ═══════════════════════════════════════════════════════════ */
+function buildNfeHtml(nfe) {
+  if (!nfe) return `<div class="no-cte-msg">Nenhuma NF-e disponível.</div>`;
+
+  const prodRows = (nfe._detList || []).map(p => `
+    <tr>
+      <td class="mono" style="font-size:.75rem;">${escHtml(p.cProd)}</td>
+      <td>${escHtml(p.xProd)}</td>
+      <td class="mono">${escHtml(p.ncm||'')}</td>
+      <td class="mono">${escHtml(p.cfop||'')}</td>
+      <td class="mono">${p.qCom.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td class="mono">${escHtml(p.uCom)}</td>
+      <td class="mono">${p.vUnCom.toLocaleString('pt-BR',{minimumFractionDigits:4})}</td>
+      <td class="mono" style="color:var(--green);font-weight:600;">${fmtCurrency(p.vProd)}</td>
+    </tr>`).join('');
+
+  const totalQtd = (nfe._detList || []).reduce((s,p) => s + p.qCom, 0);
+
+  // Entrega — só exibe a seção se houver dados
+  const temEntrega = nfe._entNome && nfe._entNome !== 'Não Informado';
+  const entregaSection = temEntrega ? `
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Endereço de Entrega
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Razão Social</span><span class="doc-field-value">${escHtml(nfe._entNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ</span><span class="doc-field-value mono">${fmtCNPJ(nfe._entCNPJ) || 'N/D'}</span></div>
+        <div class="doc-field"><span class="doc-field-label">Município</span><span class="doc-field-value">${escHtml(nfe._entMun) || 'N/D'}</span></div>
+        <div class="doc-field"><span class="doc-field-label">UF</span><span class="doc-field-value mono">${escHtml(nfe._entUF) || 'N/D'}</span></div>
+      </div>
+    </div>` : '';
+
+  // Observações — só exibe se houver conteúdo
+  const obsSection = nfe._infCpl ? `
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Observações Complementares
+      </div>
+      <p style="font-size:.86rem;color:var(--muted);line-height:1.7;white-space:pre-wrap;">${escHtml(nfe._infCpl)}</p>
+    </div>` : '';
+
+  return `
+  <div class="doc-viewer">
+    <div class="doc-actions">
+      <button class="btn-print" onclick="window.print()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir
+      </button>
+      <button class="btn-entenda" onclick="modalShowExplain('nfe')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Entenda o XML
+      </button>
+    </div>
+
+    <!-- Identificação -->
+    <div class="doc-header">
+      <div class="doc-header-left">
+        <div class="doc-tipo-badge">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          NF-e
+        </div>
+        <div class="doc-numero">Nota ${escHtml(nfe._nNF)} — Série ${escHtml(nfe._serie)}</div>
+        <div class="doc-data">Emissão: ${nfe._data || 'N/D'}</div>
+        <div class="doc-chave" style="margin-top:8px;">${escHtml(nfe.chave)}</div>
+      </div>
+    </div>
+
+    <!-- Emitente -->
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Emitente
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Razão Social</span><span class="doc-field-value">${escHtml(nfe._emitNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ / CPF</span><span class="doc-field-value mono">${fmtCNPJ(nfe._emitCNPJ) || 'N/D'}</span></div>
+      </div>
+    </div>
+
+    <!-- Destinatário -->
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Destinatário
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Razão Social</span><span class="doc-field-value">${escHtml(nfe._destNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ / CPF</span><span class="doc-field-value mono">${fmtCNPJ(nfe._destCNPJ) || 'N/D'}</span></div>
+      </div>
+    </div>
+
+    <!-- Endereço de Entrega (condicional) -->
+    ${entregaSection}
+
+    <!-- Transporte -->
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Transporte
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field">
+          <span class="doc-field-label">Modalidade de Frete</span>
+          <span class="doc-field-value mono">${nfe.modFrete !== '' && nfe.modFrete !== undefined ? escHtml(nfe.modFrete) : 'N/D'}</span>
+        </div>
+        <div class="doc-field">
+          <span class="doc-field-label">Peso Total (B)</span>
+          <span class="doc-field-value mono">${nfe._pesoB ? escHtml(nfe._pesoB) + ' KG' : 'N/D'}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Produtos / Itens -->
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Produtos / Itens
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Código</th><th>Descrição</th><th>NCM</th><th>CFOP</th>
+              <th>Quantidade</th><th>Unid.</th><th>Vlr. Unitário</th><th>Vlr. Total</th>
+            </tr>
+          </thead>
+          <tbody>${prodRows || '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:16px;">Nenhum item encontrado.</td></tr>'}</tbody>
+        </table>
+      </div>
+      <div class="doc-totals">
+        <div class="doc-total-item">
+          <span class="doc-total-label">Valor Total NF</span>
+          <span class="doc-total-value">${fmtCurrency(nfe._vNF)}</span>
+        </div>
+        <div class="doc-total-item">
+          <span class="doc-total-label">Qtd. Total</span>
+          <span class="doc-total-value">${totalQtd.toLocaleString('pt-BR',{minimumFractionDigits:2})} KG</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Observações (condicional) -->
+    ${obsSection}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURE 05 — RECONSTRUÇÃO VISUAL DO CT-e
+   ═══════════════════════════════════════════════════════════ */
+function buildCteHtml(cte) {
+  if (!cte) return `<div class="no-cte-msg">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--muted2);margin-bottom:12px;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <div>Nenhum CT-e relacionado encontrado.</div>
+  </div>`;
+
+  const nfesRows = cte.chavesReferenciadas.length
+    ? cte.chavesReferenciadas.map(c => `<tr><td class="mono" style="font-size:.72rem;">${escHtml(c)}</td></tr>`).join('')
+    : `<tr><td style="color:var(--muted);padding:14px;">Nenhuma chave detectada.</td></tr>`;
+
+  const barcodeHtml = buildBarcodeSvg(cte.chaveCte);
+
+  return `
+  <div class="doc-viewer">
+    <div class="doc-actions">
+      <!-- FEATURE 06 — Botão Imprimir CT-e -->
+      <button class="btn-print" onclick="window.print()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Imprimir
+      </button>
+      <!-- FEATURE 07 — Botão Entenda o XML -->
+      <button class="btn-entenda" onclick="modalShowExplain('cte')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Entenda o XML
+      </button>
+    </div>
+
+    <div class="doc-header">
+      <div class="doc-header-left">
+        <div class="doc-tipo-badge" style="background:rgba(240,192,32,0.1);border-color:rgba(240,192,32,0.3);color:var(--yellow);">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          CT-e
+        </div>
+        <div class="doc-numero">CT ${escHtml(cte.nCT)} — Série ${escHtml(cte.serie)}</div>
+        <div class="doc-data">Emissão: ${cte.dataFormatada || 'N/D'}</div>
+        <div class="doc-chave" style="margin-top:8px;">${escHtml(cte.chaveCte)}</div>
+      </div>
+      <div class="doc-header-right">
+        <div class="barcode-wrap">
+          ${barcodeHtml}
+          <div id="qrcode-cte"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Transportadora
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Razão Social</span><span class="doc-field-value">${escHtml(cte.emitNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ</span><span class="doc-field-value mono">${fmtCNPJ(cte.emitCNPJ) || 'N/D'}</span></div>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
+        Partes Envolvidas
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Remetente</span><span class="doc-field-value">${escHtml(cte.remeteNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ Remetente</span><span class="doc-field-value mono">${fmtCNPJ(cte.remeteCNPJ) || 'N/D'}</span></div>
+        <div class="doc-field"><span class="doc-field-label">Destinatário</span><span class="doc-field-value">${escHtml(cte.destNome) || 'N/D'}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ Destinatário</span><span class="doc-field-value mono">${fmtCNPJ(cte.destCNPJ) || 'N/D'}</span></div>
+        ${cte.recNome ? `<div class="doc-field"><span class="doc-field-label">Recebedor</span><span class="doc-field-value">${escHtml(cte.recNome)}</span></div>` : ''}
+        <div class="doc-field"><span class="doc-field-label">Tomador</span><span class="doc-field-value">${escHtml(cte.tomaFreteDesc)}</span></div>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Valor do Frete
+      </div>
+      <div class="doc-totals">
+        <div class="doc-total-item">
+          <span class="doc-total-label">Total Prestação</span>
+          <span class="doc-total-value">${fmtCurrency(cte.vTPrest)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        NF-es Vinculadas
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="doc-table">
+          <thead><tr><th>Chave de Acesso NF-e</th></tr></thead>
+          <tbody>${nfesRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURE 07 — ENTENDA O XML
+   Percorre o xmlDoc e explica cada grupo principal
+   ═══════════════════════════════════════════════════════════ */
+function modalShowExplain(tipo) {
+  const body = document.getElementById('modal-body');
+  const xmlDoc = tipo === 'nfe' ? modalCurrentNfe?.xmlDoc : modalCurrentCte?.xmlDoc;
+
+  if (!xmlDoc) { body.innerHTML = `<div class="no-cte-msg">XML não disponível para análise.</div>`; return; }
+
+  // Mapa de tags e suas explicações
+  const explanations = {
+    'ide':       'Identificação do documento fiscal. Contém dados como código, série, número e data de emissão.',
+    'emit':      'Emitente responsável pela emissão do documento fiscal. Contém CNPJ, razão social e endereço.',
+    'dest':      'Destinatário responsável pelo recebimento da mercadoria ou serviço.',
+    'transp':    'Grupo responsável pelas informações de transporte, incluindo modalidade de frete e volumes.',
+    'modFrete':  'Campo responsável pela modalidade de frete utilizada na operação (0=CIF, 1=FOB, 9=Sem frete, etc.).',
+    'vol':       'Informações sobre volume e peso da carga transportada.',
+    'det':       'Grupo responsável pelos itens da nota fiscal. Cada ocorrência representa um produto distinto.',
+    'prod':      'Dados do produto: código, descrição, NCM, CFOP, quantidade e valores.',
+    'imposto':   'Grupo de tributos incidentes sobre o item (ICMS, IPI, PIS, COFINS e outros).',
+    'ICMSTot':   'Grupo responsável pelos totais fiscais da operação, incluindo valores de ICMS e totais gerais.',
+    'total':     'Totalização geral da nota: base de cálculo, impostos, descontos e valor líquido.',
+    'infAdic':   'Informações adicionais, observações complementares e dados de uso interno.',
+    'infCpl':    'Campo de complemento de informações, usado frequentemente para dados logísticos e fiscais.',
+    // CT-e específicos
+    'infCte':    'Nó raiz com todas as informações do CT-e. Contém chave de acesso no atributo Id.',
+    'compl':     'Grupo de complemento do CT-e com observações, passagem e outras informações adicionais.',
+    'rem':       'Remetente — parte que origina a expedição da mercadoria.',
+    'dest':      'Destinatário — parte que recebe a mercadoria no CT-e.',
+    'receb':     'Recebedor — parte que efetua o recebimento físico da mercadoria.',
+    'vPrest':    'Grupo de valores da prestação do serviço de transporte.',
+    'infDoc':    'Documentos fiscais relacionados ao CT-e. Lista as chaves das NF-es que fundamentam o transporte.',
+    'toma3':     'Identificação do tomador do serviço (remetente=0, expedidor=1, recebedor=2, destinatário=3).',
+    'toma4':     'Tomador externo do serviço, identificado por CNPJ/CPF — código 4 (Outros).',
+  };
+
+  // Percorre todas as tags e filtra as relevantes
+  const tagsToExplain = Object.keys(explanations);
+  const cards = [];
+
+  tagsToExplain.forEach(tagName => {
+    const el = xmlDoc.getElementsByTagName(tagName)[0];
+    if (!el) return;
+
+    // Pega um valor resumido — apenas texto direto ou primeiro filho texto
+    let valorResumido = el.textContent?.trim() || '';
+    if (valorResumido.length > 120) valorResumido = valorResumido.substring(0, 120) + '…';
+    if (valorResumido.length === 0) valorResumido = '(grupo sem valor direto)';
+
+    cards.push(`
+      <div class="xml-tag-card">
+        <div class="xml-tag-header">
+          <span class="xml-tag-name">&lt;${escHtml(tagName)}&gt;</span>
+          ${valorResumido !== '(grupo sem valor direto)' ? `<span class="xml-tag-value">${escHtml(valorResumido.substring(0,60))}${valorResumido.length > 60 ? '…' : ''}</span>` : ''}
+        </div>
+        <div class="xml-tag-desc">${explanations[tagName]}</div>
+      </div>`);
   });
 
-  function drawNodes() {
-    ctx.clearRect(0, 0, width, height);
-    ctx.strokeStyle = document.documentElement.getAttribute('data-theme') === 'light'
-      ? 'rgba(17,203,7,0.10)' : 'rgba(17,203,7,0.04)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i < width;  i += 60) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, height); ctx.stroke(); }
-    for (let j = 0; j < height; j += 60) { ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(width, j); ctx.stroke(); }
+  body.innerHTML = `
+    <div class="xml-explain-panel">
+      <div class="xml-explain-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Entenda o XML — ${tipo.toUpperCase()}
+      </div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:20px;line-height:1.6;">
+        Abaixo estão os principais grupos e campos encontrados neste documento, traduzidos para uma linguagem clara e objetiva.
+      </p>
+      ${cards.length ? cards.join('') : '<div class="no-cte-msg">Nenhuma tag reconhecida encontrada no XML.</div>'}
+      <button class="btn-entenda" style="margin-top:16px;" onclick="modalShowTab('${tipo}')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Voltar ao documento
+      </button>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HELPER — Geração de barcode SVG simplificado
+   Representa visualmente a chave de 44 dígitos
+   ═══════════════════════════════════════════════════════════ */
+function buildBarcodeSvg(chave) {
+  if (!chave) return '';
+  // Gera padrão de barras baseado nos dígitos da chave
+  const bars = [];
+  const w = 160, h = 40;
+  const digits = chave.replace(/\D/g, '');
+  const barCount = 44;
+  const barW = w / (barCount * 2.2);
+
+  for (let i = 0; i < barCount; i++) {
+    const d   = parseInt(digits[i] || '0');
+    const x   = i * (w / barCount);
+    const bh  = h * (0.4 + (d / 9) * 0.6);
+    const col = d > 5 ? 'rgba(17,203,7,0.9)' : 'rgba(17,203,7,0.5)';
+    bars.push(`<rect x="${x.toFixed(1)}" y="${(h - bh).toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}"/>`);
   }
 
-  setInterval(drawNodes, 2000);
-  drawNodes();
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="barcode-svg" xmlns="http://www.w3.org/2000/svg"
+    style="border:1px solid var(--green-border);border-radius:4px;padding:4px;background:rgba(0,0,0,0.3);">
+    ${bars.join('')}
+  </svg>`;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FEATURE 08 — CANVAS CIRCUIT/NEURAL BACKGROUND
+   Fundo animado inspirado em circuitos e redes neurais.
+   Utiliza requestAnimationFrame para performance otimizada.
+   Elementos: grid de circuito, nós neurais, pulsos de energia.
+   ═══════════════════════════════════════════════════════════ */
+(function initCircuitBackground() {
+  const canvas = document.getElementById('circuit-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  // ─── Resize handler ───────────────────────────────────────
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ─── Nós da rede neural ────────────────────────────────────
+  const NODE_COUNT = 28;
+  const nodes = [];
+  for (let i = 0; i < NODE_COUNT; i++) {
+    nodes.push({
+      x: Math.random(),   // 0–1 normalizado
+      y: Math.random(),
+      vx: (Math.random() - 0.5) * 0.00015,
+      vy: (Math.random() - 0.5) * 0.00015,
+      r:  2 + Math.random() * 2,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: 0.008 + Math.random() * 0.012,
+    });
+  }
+
+  // ─── Pulsos de energia percorrendo as arestas ──────────────
+  const PULSE_COUNT = 14;
+  const pulses = [];
+  for (let i = 0; i < PULSE_COUNT; i++) {
+    pulses.push({ t: Math.random(), speed: 0.002 + Math.random() * 0.003, edge: null });
+  }
+
+  // ─── Linhas de circuito estáticas (grid ortogonal) ─────────
+  const GRID_LINES = [];
+  const gridSpacingX = 80, gridSpacingY = 80;
+  // Horizontais
+  for (let y = gridSpacingY; y < 2000; y += gridSpacingY) {
+    GRID_LINES.push({ x1: 0, y1: y, x2: 2000, y2: y, type: 'h' });
+  }
+  // Verticais
+  for (let x = gridSpacingX; x < 2000; x += gridSpacingX) {
+    GRID_LINES.push({ x1: x, y1: 0, x2: x, y2: 2000, type: 'v' });
+  }
+
+  // ─── Partículas flutuantes ─────────────────────────────────
+  const PARTICLE_COUNT = 20;
+  const particles = [];
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      x: Math.random(), y: Math.random(),
+      r: 0.5 + Math.random() * 1.2,
+      vy: -0.0001 - Math.random() * 0.0002,
+      alpha: Math.random(),
+      alphaDir: (Math.random() > 0.5 ? 1 : -1) * 0.003
+    });
+  }
+
+  let frame = 0;
+
+  // ─── Loop principal ────────────────────────────────────────
+  function draw() {
+    requestAnimationFrame(draw);
+    frame++;
+
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const baseAlpha = isDark ? 0.18 : 0.10;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // 1. Grid de circuito ortogonal
+    const gridAlpha = isDark ? 0.04 : 0.025;
+    ctx.strokeStyle = `rgba(17,203,7,${gridAlpha})`;
+    ctx.lineWidth   = 0.8;
+    GRID_LINES.forEach(l => {
+      ctx.beginPath();
+      ctx.moveTo(l.x1 % W, l.y1 % H);
+      ctx.lineTo(l.x2 % W, l.y2 % H);
+      ctx.stroke();
+    });
+
+    // 2. Arestas da rede neural com distância máxima
+    const maxDist = 0.28; // normalizado
+    const edgeList = [];
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < maxDist) {
+          const a = (1 - dist / maxDist) * baseAlpha * 0.6;
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(17,203,7,${a.toFixed(3)})`;
+          ctx.lineWidth = 0.6;
+          ctx.moveTo(nodes[i].x * W, nodes[i].y * H);
+          ctx.lineTo(nodes[j].x * W, nodes[j].y * H);
+          ctx.stroke();
+          edgeList.push({ i, j, dist });
+        }
+      }
+    }
+
+    // 3. Pulsos de energia percorrendo arestas
+    if (edgeList.length > 0) {
+      pulses.forEach(p => {
+        if (!p.edge || p.t >= 1) {
+          p.edge = edgeList[Math.floor(Math.random() * edgeList.length)];
+          p.t = 0;
+        }
+        p.t += p.speed;
+        if (!p.edge) return;
+        const n1 = nodes[p.edge.i], n2 = nodes[p.edge.j];
+        const px = n1.x + (n2.x - n1.x) * p.t;
+        const py = n1.y + (n2.y - n1.y) * p.t;
+        const alpha = Math.sin(p.t * Math.PI) * baseAlpha * 2.5;
+
+        ctx.beginPath();
+        ctx.arc(px * W, py * H, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(17,203,7,${alpha.toFixed(3)})`;
+        ctx.fill();
+
+        // Rastro do pulso
+        ctx.beginPath();
+        ctx.arc(px * W, py * H, 5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(17,203,7,${(alpha * 0.3).toFixed(3)})`;
+        ctx.fill();
+      });
+    }
+
+    // 4. Nós neurais com pulsação
+    nodes.forEach(n => {
+      n.pulse += n.pulseSpeed;
+      const glow = 0.5 + 0.5 * Math.sin(n.pulse);
+      const alpha = baseAlpha * (0.5 + glow * 0.8);
+
+      // Glow externo
+      const grad = ctx.createRadialGradient(n.x * W, n.y * H, 0, n.x * W, n.y * H, n.r * 4);
+      grad.addColorStop(0, `rgba(17,203,7,${(alpha * 0.6).toFixed(3)})`);
+      grad.addColorStop(1, 'rgba(17,203,7,0)');
+      ctx.beginPath();
+      ctx.arc(n.x * W, n.y * H, n.r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Ponto central
+      ctx.beginPath();
+      ctx.arc(n.x * W, n.y * H, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(17,203,7,${(alpha * 1.4).toFixed(3)})`;
+      ctx.fill();
+
+      // Movimento suave dos nós
+      n.x += n.vx;
+      n.y += n.vy;
+      if (n.x < 0 || n.x > 1) n.vx *= -1;
+      if (n.y < 0 || n.y > 1) n.vy *= -1;
+      n.x = Math.max(0, Math.min(1, n.x));
+      n.y = Math.max(0, Math.min(1, n.y));
+    });
+
+    // 5. Partículas flutuantes
+    particles.forEach(p => {
+      p.alpha += p.alphaDir;
+      if (p.alpha <= 0 || p.alpha >= 0.7) p.alphaDir *= -1;
+      p.y += p.vy;
+      if (p.y < 0) p.y = 1;
+      ctx.beginPath();
+      ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${(p.alpha * baseAlpha * 0.8).toFixed(3)})`;
+      ctx.fill();
+    });
+
+    // 6. Linhas de fluxo horizontal (scanlines sutis)
+    if (frame % 3 === 0) {
+      const scanY = (frame * 0.4) % H;
+      ctx.beginPath();
+      ctx.moveTo(0, scanY);
+      ctx.lineTo(W, scanY);
+      ctx.strokeStyle = `rgba(17,203,7,${(isDark ? 0.018 : 0.009)})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  draw();
+})();
 </script>
 
 </body>
