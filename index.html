@@ -893,7 +893,7 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
     const vProd = parseFloat(prod.getElementsByTagName('vProd')[0]?.textContent || '0');
 
     // Conversão TON → KG
-    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO') {
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO' || uCom === 'TL') {
       qCom = qCom * 1000; vUnCom = vUnCom / 1000; uCom = 'KG';
     }
     pesoAcumulado += qCom;
