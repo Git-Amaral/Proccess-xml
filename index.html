@@ -857,6 +857,9 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
 
   const infCpl = g('infCpl') || '';
 
+  // Natureza da operação
+  const natOp = g('natOp') || '';
+
   // Dados de entrega
   const entrega = xmlDoc.getElementsByTagName('entrega')[0];
   const entCNPJ = entrega ? (entrega.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
@@ -871,6 +874,12 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
   // Peso bruto total (transporte)
   const qVolTotal = g('qVol') || '';
   const pesoB     = g('pesoB') || '';
+
+  // Transportadora — nó <transporta> dentro de <transp>
+  const transpNode = xmlDoc.getElementsByTagName('transporta')[0];
+  const transpCNPJ = transpNode ? (transpNode.getElementsByTagName('CNPJ')[0]?.textContent?.trim() || '') : '';
+  const transpNome = transpNode ? (transpNode.getElementsByTagName('xNome')[0]?.textContent?.trim() || '') : '';
+  const transpIE   = transpNode ? (transpNode.getElementsByTagName('IE')[0]?.textContent?.trim()   || '') : '';
 
   // Itens (det)
   let pesoAcumulado = 0;
@@ -923,6 +932,10 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
       'VALOR_TOTAL_ITEM':           vProd,
       /* FEATURE 01 — Coluna MOD_FRETE adicionada ao Excel */
       'MOD_FRETE':                  modFrete,
+      'NAT_OPERACAO':               natOp,
+      'TRANSP_CNPJ':               fmtCNPJ(transpCNPJ),
+      'TRANSP_NOME':               transpNome,
+      'TRANSP_IE':                 transpIE,
       'OBSERVACOES_COMPLEMENTARES': infCpl
     });
   }
@@ -941,6 +954,8 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
     _destNome: destinoNome, _destCNPJ: destCNPJ,
     _vNF: vNF, _infCpl: infCpl, _pesoB: pesoB,
     _entNome: entNome, _entCNPJ: entCNPJ, _entMun: entMun, _entUF: entUF,
+    _natOp: natOp,
+    _transpCNPJ: transpCNPJ, _transpNome: transpNome, _transpIE: transpIE,
     _detList: buildDetList(xmlDoc),
   };
 
@@ -962,7 +977,7 @@ function buildDetList(xmlDoc) {
     let uCom   = (prod.getElementsByTagName('uCom')[0]?.textContent || '').toUpperCase().trim();
     let qCom   = parseFloat(prod.getElementsByTagName('qCom')[0]?.textContent || '0');
     let vUnCom = parseFloat(prod.getElementsByTagName('vUnCom')[0]?.textContent || '0');
-    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T') { qCom*=1000; vUnCom/=1000; uCom='KG'; }
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO' || uCom === 'TL') { qCom*=1000; vUnCom/=1000; uCom='KG'; }
     items.push({
       cProd:  prod.getElementsByTagName('cProd')[0]?.textContent?.trim() || '',
       xProd:  prod.getElementsByTagName('xProd')[0]?.textContent?.trim() || '',
@@ -1174,6 +1189,8 @@ function downloadExcelSheets() {
     'NUM_ITEM', 'COD_PRODUTO', 'DESCRICAO_PRODUTO', 'NCM', 'CFOP', 'UNIDADE_MEDIDA',
     'QTD_COMERCIAL (KG)', 'VALOR_UNITARIO (KG)', 'VALOR_TOTAL_ITEM',
     'MOD_FRETE',
+    'NAT_OPERACAO',
+    'TRANSP_CNPJ', 'TRANSP_NOME', 'TRANSP_IE',
     'OBSERVACOES_COMPLEMENTARES'
   ];
   const headerCte = [
@@ -1368,6 +1385,7 @@ function buildNfeHtml(nfe) {
         <div class="doc-numero">Nota ${escHtml(nfe._nNF)} — Série ${escHtml(nfe._serie)}</div>
         <div class="doc-data">Emissão: ${nfe._data || 'N/D'}</div>
         <div class="doc-chave" style="margin-top:8px;">${escHtml(nfe.chave)}</div>
+        ${nfe._natOp ? `<div class="doc-field" style="margin-top:10px;"><span class="doc-field-label">Natureza da Operação</span><span class="doc-field-value" style="font-size:.82rem;">${escHtml(nfe._natOp)}</span></div>` : ''}
       </div>
     </div>
 
@@ -1415,6 +1433,20 @@ function buildNfeHtml(nfe) {
         </div>
       </div>
     </div>
+
+    <!-- Transportadora -->
+    ${nfe._transpNome ? `
+    <div class="doc-section">
+      <div class="doc-section-title">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Transportadora
+      </div>
+      <div class="doc-grid">
+        <div class="doc-field"><span class="doc-field-label">Razão Social</span><span class="doc-field-value">${escHtml(nfe._transpNome)}</span></div>
+        <div class="doc-field"><span class="doc-field-label">CNPJ</span><span class="doc-field-value mono">${fmtCNPJ(nfe._transpCNPJ) || 'N/D'}</span></div>
+        ${nfe._transpIE ? `<div class="doc-field"><span class="doc-field-label">Inscrição Estadual</span><span class="doc-field-value mono">${escHtml(nfe._transpIE)}</span></div>` : ''}
+      </div>
+    </div>` : ''}
 
     <!-- Produtos / Itens -->
     <div class="doc-section">
