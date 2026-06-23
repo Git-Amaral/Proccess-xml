@@ -447,6 +447,107 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
 }
 .xml-tag-desc{font-size:.85rem;color:var(--muted);line-height:1.6;}
 
+
+/* ═══════════════════════════════════════════
+   LOADING OVERLAY — "Codificando..."
+   ═══════════════════════════════════════════ */
+.loading-overlay{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:2000;
+  background:rgba(6,9,15,0.82);
+  backdrop-filter:blur(8px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:24px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.loading-overlay.active{opacity:1;pointer-events:all;}
+.loading-title{
+  font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;
+  color:var(--text);letter-spacing:-0.5px;
+}
+.loading-sub{font-size:.85rem;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+.loading-bar-wrap{
+  width:320px;height:6px;background:rgba(255,255,255,0.07);
+  border-radius:100px;overflow:hidden;
+}
+.loading-bar{
+  height:100%;width:0%;border-radius:100px;
+  background:linear-gradient(90deg,var(--green),#0da604);
+  box-shadow:0 0 12px var(--green-glow);
+  transition:width .18s ease;
+}
+.loading-count{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--muted);
+}
+
+/* ═══════════════════════════════════════════
+   FILTROS DE COLUNA — dropdown estilo Excel
+   ═══════════════════════════════════════════ */
+.th-filter-wrap{position:relative;display:inline-flex;align-items:center;gap:5px;}
+.btn-col-filter{
+  background:transparent;border:none;cursor:pointer;
+  color:var(--muted2);padding:2px;border-radius:4px;
+  display:inline-flex;align-items:center;
+  transition:color .15s;flex-shrink:0;
+}
+.btn-col-filter:hover,.btn-col-filter.active{color:var(--green);}
+.filter-dropdown{
+  display:none;position:absolute;top:calc(100% + 6px);left:0;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:10px;min-width:210px;z-index:500;
+  box-shadow:0 12px 40px rgba(0,0,0,0.5);
+  animation:fadeIn .18s ease;
+}
+.filter-dropdown.open{display:block;}
+.filter-search{
+  width:100%;padding:7px 10px;border-radius:7px;
+  border:1px solid var(--border);background:var(--card2);
+  color:var(--text);font-size:.82rem;font-family:'Inter',sans-serif;
+  outline:none;margin-bottom:8px;
+}
+.filter-search:focus{border-color:var(--green-border);}
+.filter-options{max-height:160px;overflow-y:auto;}
+.filter-option{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 4px;cursor:pointer;border-radius:5px;
+  font-size:.82rem;color:var(--text);
+  transition:background .12s;
+}
+.filter-option:hover{background:var(--green-dim);}
+.filter-option input[type=checkbox]{
+  accent-color:var(--green);width:14px;height:14px;cursor:pointer;
+}
+.filter-actions{
+  display:flex;gap:6px;margin-top:8px;padding-top:8px;
+  border-top:1px solid var(--border);
+}
+.filter-action-btn{
+  flex:1;padding:6px 8px;border-radius:6px;font-size:.75rem;font-weight:600;
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--card2);color:var(--muted);
+  font-family:'Inter',sans-serif;transition:all .15s;
+}
+.filter-action-btn:hover{border-color:var(--green-border);color:var(--text);}
+.filter-action-btn.apply{background:var(--green);color:#fff;border-color:var(--green);}
+.filter-action-btn.apply:hover{box-shadow:0 0 12px var(--green-glow);}
+
+/* Botão limpar filtros */
+.btn-clear-filters{
+  display:none;
+  align-items:center;gap:6px;
+  padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:600;
+  cursor:pointer;border:1px solid rgba(255,68,68,0.35);
+  background:rgba(255,68,68,0.09);color:var(--red);
+  font-family:'Inter',sans-serif;transition:all .2s;
+}
+.btn-clear-filters:hover{
+  background:rgba(255,68,68,0.18);border-color:rgba(255,68,68,0.6);
+  box-shadow:0 0 12px rgba(255,68,68,0.18);
+}
+.btn-clear-filters.visible{display:inline-flex;}
+
 /* No CT-e relacionado */
 .no-cte-msg{
   text-align:center;padding:50px 20px;color:var(--muted);
@@ -481,6 +582,19 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
 
 <!-- FEATURE 08 — Canvas para fundo de circuitos neurais animados -->
 <canvas id="circuit-canvas"></canvas>
+
+<!-- LOADING OVERLAY — Codificando... -->
+<div class="loading-overlay" id="loading-overlay">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1.2s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+    <span class="loading-title">Codificando...</span>
+  </div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <span class="loading-count" id="loading-count">Preparando arquivos</span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+
 
 <nav>
   <a class="nav-logo" href="#">
@@ -615,13 +729,15 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
           Tabela Consolidada (Apenas NF-e)
         </div>
         <div class="btn-group">
+          <button class="btn-clear-filters" id="btn-clear-filters" onclick="clearAllFilters()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Limpar Filtros
+          </button>
           <button class="btn btn-secondary" id="btn-download-excel" style="display:none;" onclick="downloadExcelSheets()">
-            <!-- Ícone: sheet -->
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
             Baixar Excel (.xlsx)
           </button>
           <button class="btn btn-primary" id="btn-download-zip" style="display:none;" onclick="downloadZipArchive()">
-            <!-- Ícone: archive -->
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
             Baixar XMLs Renomeados (.zip)
           </button>
@@ -632,16 +748,14 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
         <table>
           <thead>
             <tr>
-              <!-- FEATURE 02 — Coluna Detalhar antes de Usina -->
               <th>Detalhar</th>
-              <th>Usina (Emitente)</th>
-              <th>Número da Nota + Série</th>
-              <th>Total Qtd Faturada</th>
+              <th><div class="th-filter-wrap">Usina (Emitente)<button class="btn-col-filter" onclick="toggleFilter(event,0)" title="Filtrar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button><div class="filter-dropdown" id="fd-0"></div></div></th>
+              <th><div class="th-filter-wrap">Número / Série<button class="btn-col-filter" onclick="toggleFilter(event,1)" title="Filtrar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button><div class="filter-dropdown" id="fd-1"></div></div></th>
+              <th>Total Qtd</th>
               <th>Valor Faturado</th>
-              <!-- FEATURE 01 — Coluna MOD_FRETE -->
-              <th>Mod. Frete</th>
+              <th><div class="th-filter-wrap">Mod. Frete<button class="btn-col-filter" onclick="toggleFilter(event,2)" title="Filtrar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button><div class="filter-dropdown" id="fd-2"></div></div></th>
               <th>Chave da Nota Fiscal</th>
-              <th>CT-e Relacionado</th>
+              <th><div class="th-filter-wrap">CT-e Relacionado<button class="btn-col-filter" onclick="toggleFilter(event,3)" title="Filtrar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></button><div class="filter-dropdown" id="fd-3"></div></div></th>
             </tr>
           </thead>
           <tbody id="tbody-principal">
@@ -703,7 +817,8 @@ tbody tr:hover td{background:rgba(17,203,7,0.03)}
 let nfeDatabase          = {};   // chave → objeto NF-e completo
 let cteDatabase          = [];   // array de objetos CT-e
 let cteDatabaseByChave   = {};   // chave CT-e → objeto completo (para modal)
-let xmlFilesToZip        = [];
+let nfeFilesToZip        = [];  // XMLs de NF-e separados
+let cteFilesToZip        = [];  // XMLs de CT-e separados
 let rawNfeRowsForExcel   = [];
 let rawCteRowsForExcel   = [];
 let globalMetrics = { totalValor:0, totalPeso:0, countNfe:0, countCte:0, destinos:{} };
@@ -764,7 +879,8 @@ async function handleFilesInput(fileList) {
   nfeDatabase        = {};
   cteDatabase        = [];
   cteDatabaseByChave = {};
-  xmlFilesToZip      = [];
+  nfeFilesToZip      = [];
+  cteFilesToZip      = [];
   rawNfeRowsForExcel = [];
   rawCteRowsForExcel = [];
   globalMetrics      = { totalValor:0, totalPeso:0, countNfe:0, countCte:0, destinos:{} };
@@ -780,16 +896,21 @@ async function handleFilesInput(fileList) {
     addLog('Nenhum arquivo válido com extensão .xml foi detectado na seleção.', 'err'); return;
   }
   addLog(`${arquivosXml.length} arquivo(s) XML encontrado(s). Processando...`, 'info');
+  showLoading('Processando XMLs...', arquivosXml.length);
 
-  for (const file of arquivosXml) {
+  for (let i = 0; i < arquivosXml.length; i++) {
+    const file = arquivosXml[i];
+    updateLoading(i + 1, arquivosXml.length, file.name);
     try {
       const text = await readFileAsText(file);
       parseXmlDocument(text, file.name);
     } catch (err) {
       addLog(`Falha crítica na leitura de ${file.name}: ${err.message}`, 'err');
     }
+    await new Promise(r => setTimeout(r, 0)); // yield para UI atualizar
   }
   crossReferenceDocuments();
+  hideLoading();
   compileAndRenderInterface();
 }
 
@@ -837,6 +958,7 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
   let chave = infNFeNode.getAttribute('Id') || '';
   chave = chave.replace(/\D/g, '').trim();
   if (!chave) { addLog('NF-e ignorada: atributo Id não encontrado no nó infNFe.', 'warn'); return; }
+  if (nfeDatabase[chave]) { addLog(`NF-e duplicada ignorada: ...${chave.slice(-14)}`, 'warn'); return; }
 
   const nNF   = g('nNF')   || '—';
   const serie = g('serie') || '—';
@@ -959,7 +1081,7 @@ function processNfeNode(xmlDoc, rawText, infNFeNode) {
     _detList: buildDetList(xmlDoc),
   };
 
-  xmlFilesToZip.push({ filename: `${chave}.xml`, content: rawText });
+  nfeFilesToZip.push({ filename: `NF-e/${chave}.xml`, content: rawText });
   globalMetrics.countNfe++;
   globalMetrics.totalValor += vNF;
   globalMetrics.totalPeso  += pesoAcumulado;
@@ -977,7 +1099,7 @@ function buildDetList(xmlDoc) {
     let uCom   = (prod.getElementsByTagName('uCom')[0]?.textContent || '').toUpperCase().trim();
     let qCom   = parseFloat(prod.getElementsByTagName('qCom')[0]?.textContent || '0');
     let vUnCom = parseFloat(prod.getElementsByTagName('vUnCom')[0]?.textContent || '0');
-    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T' || uCom === 'TO' || uCom === 'TL') { qCom*=1000; vUnCom/=1000; uCom='KG'; }
+    if (uCom === 'TON' || uCom === 'TONELADA' || uCom === 'T') { qCom*=1000; vUnCom/=1000; uCom='KG'; }
     items.push({
       cProd:  prod.getElementsByTagName('cProd')[0]?.textContent?.trim() || '',
       xProd:  prod.getElementsByTagName('xProd')[0]?.textContent?.trim() || '',
@@ -999,6 +1121,7 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
   let chaveCte = infCteNode.getAttribute('Id') || '';
   chaveCte = chaveCte.replace(/\D/g, '').trim();
   if (!chaveCte) { addLog('CT-e ignorado: atributo Id não encontrado no nó infCte.', 'warn'); return; }
+  if (cteDatabaseByChave[chaveCte]) { addLog(`CT-e duplicado ignorado: ...${chaveCte.slice(-14)}`, 'warn'); return; }
 
   const nCT   = g('nCT')   || '—';
   const serie = g('serie') || '—';
@@ -1084,7 +1207,7 @@ function processCteNode(xmlDoc, rawText, infCteNode) {
   };
 
   cteDatabase.push({ chaveCte, nfeAlvoList: chavesReferenciadas });
-  xmlFilesToZip.push({ filename: `${chaveCte}.xml`, content: rawText });
+  cteFilesToZip.push({ filename: `CT-e/${chaveCte}.xml`, content: rawText });
   globalMetrics.countCte++;
   addLog(`CT-e identificado  ✓  Chave: ...${chaveCte.slice(-14)}  |  ${chavesReferenciadas.length} NF(s) vinculada(s)`, 'ok');
 }
@@ -1136,6 +1259,7 @@ function compileAndRenderInterface() {
     chavesNfe.forEach(chave => {
       const item = nfeDatabase[chave];
       const tr   = document.createElement('tr');
+      tr.setAttribute('data-chave', chave);
       const cteLabel = item.cteVinculado !== '—'
         ? `<span style="color:var(--yellow);font-weight:600;font-size:.72rem;">${item.cteVinculado}</span>`
         : `<span style="color:var(--muted2)">—</span>`;
@@ -1165,7 +1289,7 @@ function compileAndRenderInterface() {
     });
   }
 
-  const temDados = xmlFilesToZip.length > 0;
+  const temDados = nfeFilesToZip.length > 0 || cteFilesToZip.length > 0;
   document.getElementById('btn-download-zip').style.display   = temDados ? 'inline-flex' : 'none';
   document.getElementById('btn-download-excel').style.display = temDados ? 'inline-flex' : 'none';
   addLog(`Processamento concluído: ${globalMetrics.countNfe} NF-e(s) | ${globalMetrics.countCte} CT-e(s) — Downloads disponíveis.`, 'info');
@@ -1178,6 +1302,8 @@ function downloadExcelSheets() {
   if (!rawNfeRowsForExcel.length && !rawCteRowsForExcel.length) {
     addLog('Nenhum registro encontrado para exportar.', 'warn'); return;
   }
+  const totalRows = rawNfeRowsForExcel.length + rawCteRowsForExcel.length;
+  showLoading('Gerando Excel...', totalRows);
   addLog('Gerando planilha Excel com abas NF-e e CT-e...', 'info');
   const wb = XLSX.utils.book_new();
 
@@ -1210,25 +1336,35 @@ function downloadExcelSheets() {
   XLSX.utils.book_append_sheet(wb, wsCte, 'CT-e');
 
   const hoje = new Date().toISOString().substring(0, 10);
-  XLSX.writeFile(wb, `CamelDev_Relatorio_${hoje}.xlsx`);
-  addLog('Planilha Excel gerada com sucesso!', 'ok');
+  updateLoading(totalRows, totalRows, 'Finalizando...');
+  setTimeout(() => {
+    XLSX.writeFile(wb, `CamelDev_Relatorio_${hoje}.xlsx`);
+    hideLoading();
+    addLog('Planilha Excel gerada com sucesso!', 'ok');
+  }, 400);
 }
 
 /* ═══════════════════════════════════════════════════════════
    EXPORTADOR ZIP — XMLs RENOMEADOS PELA CHAVE OFICIAL
    ═══════════════════════════════════════════════════════════ */
 function downloadZipArchive() {
-  if (!xmlFilesToZip.length) return;
-  addLog('Comprimindo XMLs renomeados pelas chaves oficiais...', 'info');
+  const allFiles = [...nfeFilesToZip, ...cteFilesToZip];
+  if (!allFiles.length) return;
+  showLoading('Compactando XMLs...', allFiles.length);
+  addLog(`Comprimindo ${nfeFilesToZip.length} NF-e(s) e ${cteFilesToZip.length} CT-e(s) em pastas separadas...`, 'info');
   const zip = new JSZip();
-  xmlFilesToZip.forEach(f => zip.file(f.filename, f.content));
-  zip.generateAsync({ type: 'blob' }).then(content => {
+  allFiles.forEach((f, i) => {
+    zip.file(f.filename, f.content);
+    updateLoading(i + 1, allFiles.length, f.filename.split('/').pop());
+  });
+  zip.generateAsync({ type: 'blob' }).then(blob => {
+    hideLoading();
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(content);
+    link.href = URL.createObjectURL(blob);
     link.download = `XMLs_Renomeados_CamelDev_${new Date().toISOString().substring(0, 10)}.zip`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
-    addLog('ZIP baixado com sucesso!', 'ok');
-  }).catch(err => addLog(`Erro ao criar ZIP: ${err.message}`, 'err'));
+    addLog('ZIP baixado com sucesso! Estrutura: /NF-e e /CT-e.', 'ok');
+  }).catch(err => { hideLoading(); addLog(`Erro ao criar ZIP: ${err.message}`, 'err'); });
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1694,6 +1830,130 @@ function buildBarcodeSvg(chave) {
    Utiliza requestAnimationFrame para performance otimizada.
    Elementos: grid de circuito, nós neurais, pulsos de energia.
    ═══════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING OVERLAY HELPERS
+   ═══════════════════════════════════════════════════════════ */
+function showLoading(label, total) {
+  document.getElementById('loading-count').textContent = label;
+  document.getElementById('loading-bar').style.width = '0%';
+  document.getElementById('loading-overlay').classList.add('active');
+}
+function updateLoading(current, total, filename) {
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('loading-bar').style.width = pct + '%';
+  const short = filename && filename.length > 38 ? '...' + filename.slice(-35) : (filename || '');
+  document.getElementById('loading-count').textContent = `${current} / ${total}  —  ${short}`;
+}
+function hideLoading() {
+  document.getElementById('loading-bar').style.width = '100%';
+  setTimeout(() => document.getElementById('loading-overlay').classList.remove('active'), 350);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTROS DE COLUNA — motor de filtragem
+   Colunas filtráveis (índice base 0 da <td>, excluindo col Detalhar):
+   0 = Usina, 1 = Número/Série, 2 = Mod.Frete, 3 = CT-e
+   ═══════════════════════════════════════════════════════════ */
+// Mapeamento: índice do filtro → índice real da <td> na linha
+const FILTER_COL_MAP = { 0: 1, 1: 2, 2: 5, 3: 7 };
+let activeFilters = { 0: null, 1: null, 2: null, 3: null }; // null = sem filtro
+
+function getColValues(colIdx) {
+  const tdIdx = FILTER_COL_MAP[colIdx];
+  const rows  = document.querySelectorAll('#tbody-principal tr[data-chave]');
+  const vals  = new Set();
+  rows.forEach(tr => {
+    const td = tr.querySelectorAll('td')[tdIdx];
+    if (td) vals.add(td.textContent.trim() || '—');
+  });
+  return [...vals].sort();
+}
+
+function toggleFilter(evt, colIdx) {
+  evt.stopPropagation();
+  // Fecha todos os outros
+  document.querySelectorAll('.filter-dropdown').forEach((d, i) => {
+    if (i !== colIdx) d.classList.remove('open');
+  });
+  const dd = document.getElementById(`fd-${colIdx}`);
+  const isOpen = dd.classList.contains('open');
+  if (isOpen) { dd.classList.remove('open'); return; }
+
+  // Popula dropdown
+  const vals = getColValues(colIdx);
+  const current = activeFilters[colIdx] || new Set(vals);
+  dd.innerHTML = `
+    <input class="filter-search" type="text" placeholder="Buscar..." oninput="filterSearch(this,${colIdx})">
+    <div class="filter-options" id="fo-${colIdx}">
+      ${vals.map(v => `
+        <label class="filter-option">
+          <input type="checkbox" value="${v.replace(/"/g,'&quot;')}" ${current.has(v) ? 'checked' : ''}>
+          <span>${v}</span>
+        </label>`).join('')}
+    </div>
+    <div class="filter-actions">
+      <button class="filter-action-btn" onclick="selectAllFilter(${colIdx},true)">Todos</button>
+      <button class="filter-action-btn" onclick="selectAllFilter(${colIdx},false)">Nenhum</button>
+      <button class="filter-action-btn apply" onclick="applyFilter(${colIdx})">Aplicar</button>
+    </div>`;
+  dd.classList.add('open');
+}
+
+function filterSearch(input, colIdx) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll(`#fo-${colIdx} .filter-option`).forEach(opt => {
+    opt.style.display = opt.querySelector('span').textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+function selectAllFilter(colIdx, checked) {
+  document.querySelectorAll(`#fo-${colIdx} input[type=checkbox]`).forEach(cb => cb.checked = checked);
+}
+
+function applyFilter(colIdx) {
+  const checked = [...document.querySelectorAll(`#fo-${colIdx} input[type=checkbox]:checked`)].map(cb => cb.value);
+  activeFilters[colIdx] = checked.length ? new Set(checked) : null;
+  document.getElementById(`fd-${colIdx}`).classList.remove('open');
+  document.querySelector(`#fd-${colIdx}`).previousElementSibling?.classList.toggle('active', !!activeFilters[colIdx]);
+  applyAllFilters();
+}
+
+function applyAllFilters() {
+  const rows = document.querySelectorAll('#tbody-principal tr[data-chave]');
+  let anyActive = false;
+  rows.forEach(tr => {
+    let visible = true;
+    Object.entries(FILTER_COL_MAP).forEach(([fi, tdIdx]) => {
+      const fSet = activeFilters[fi];
+      if (!fSet) return;
+      anyActive = true;
+      const td = tr.querySelectorAll('td')[tdIdx];
+      const val = td ? td.textContent.trim() || '—' : '—';
+      if (!fSet.has(val)) visible = false;
+    });
+    tr.style.display = visible ? '' : 'none';
+  });
+  const btn = document.getElementById('btn-clear-filters');
+  if (btn) btn.classList.toggle('visible', anyActive);
+}
+
+function clearAllFilters() {
+  activeFilters = { 0: null, 1: null, 2: null, 3: null };
+  document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('open'));
+  document.querySelectorAll('.btn-col-filter').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#tbody-principal tr[data-chave]').forEach(tr => tr.style.display = '');
+  const btn = document.getElementById('btn-clear-filters');
+  if (btn) btn.classList.remove('visible');
+}
+
+// Fecha dropdowns ao clicar fora
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.th-filter-wrap')) {
+    document.querySelectorAll('.filter-dropdown').forEach(d => d.classList.remove('open'));
+  }
+});
+
 (function initCircuitBackground() {
   const canvas = document.getElementById('circuit-canvas');
   if (!canvas) return;
